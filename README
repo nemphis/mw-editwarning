@@ -1,0 +1,56 @@
+================================================
+ MediaWiki Extension: EditWarning
+================================================
+
+Author: Thomas David (ThomasDavid@gmx.de)
+Version: 0.3.1
+Date: 2008-05-09
+Licence: GNU AGPL 3.0 or later
+
+If the user opens a page for editing which is being edited by another user
+at the same time this extension displays a warning on the editing page.
+
+Notice: It's not recommend to use this extension if anonymous users
+are allowed to edit pages, because it ignores anonymous page edits.
+
+Notice: It's strongly recommened to upgrade to 0.3.1, if you use an older
+of this extension.
+ 
+===== Installation =====
+
+1.) Move the folder "EditWarning" to the "extensions" folder of your
+    MediaWiki installation.
+
+2.) Execute the following SQL statement in your MediaWiki database:
+
+CREATE TABLE `current_edits` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `page_id` int(10) unsigned NOT NULL,
+  `user_id` int(10) unsigned NOT NULL,
+  `user_name` varchar(255) character set latin1 collate latin1_bin NOT NULL,
+  `timestamp` int(10) unsigned NOT NULL,
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+3.) Add this line to your LocalSettings.php:
+
+require_once("$IP/extensions/EditWarning/EditWarning.php");
+
+4.) Open the file includes/EditPage.php of your MediaWiki installation
+    and search for the line:
+
+<span class='editHelp'>{$cancel} | {$edithelp}</span>
+
+    Replace that line with:
+
+<span class='editHelp'>{$edithelp}</span>
+
+5.) Optional: The default timeout is set to 10 minutes. If you want to change
+              this setting, add this line to your LocalSettings.php
+              (Note: The value is the number of minutes):
+
+$EditWarning_Timeout = 5;
+
+===== Update =====
+
+see UPDATE.

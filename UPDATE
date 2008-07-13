@@ -1,0 +1,36 @@
+================================================
+ Update this extension
+================================================
+
+This file describes the steps to update from a previous version of this
+extension to the current one. You shouldn't perform a update without
+making a backup of your data.
+
+==== from 0.3 beta ====
+
+Move the folder "EditWarning" to the "extensions" folder of your MediaWiki
+installation and overwrite the old files.
+
+==== from 0.1 beta ====
+
+1.) Execute the following SQL statement in your MediaWiki database:
+
+TRUNCATE TABLE `current_edits` 
+
+2.) Move the folder "EditWarning" to the "extensions" folder of your
+    MediaWiki installation and overwrite all files.
+
+3.) Open the file includes/EditPage.php of your MediaWiki installation
+    and search for the line:
+
+<span class='editHelp'>{$cancel} | {$edithelp}</span>
+
+    Replace that line with:
+
+<span class='editHelp'>{$edithelp}</span>
+
+4.) Optional: The default timeout is set to 10 minutes. If you want to
+              change this setting, add this line to your LocalSettings.php
+              (Note: The value is the number of minutes):
+
+$EditWarning_Timeout = 5;

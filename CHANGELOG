@@ -1,0 +1,22 @@
+================================================
+ EditWarning CHANGELOG
+================================================
+
+==== 0.3.1 (2008-05-09) ===
+ * Bugfix: User will be correctly redirected to page on editing abort.
+ * Bugfix: Abort editing worked only with pages in the NS_MAIN namespace.
+ * Some code cleanup
+
+==== 0.3 beta (2008-03-30) ====
+ * Some code rewritten.
+ * Timeout is configurable.
+ * If the user opens a article for editing, the extension hides everything
+   except the editor tab.
+ * Button to cancel editing.
+ * All warnings of a user will be removed on logout.
+ * New look for messages.
+ * Message strings seperated from templates.
+ * Improved messages. 
+  
+==== 0.1 beta (2007-11-30) ====
+ * First release
