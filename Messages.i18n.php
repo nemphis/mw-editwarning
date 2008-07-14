@@ -42,7 +42,7 @@ $messages['LANGCODE'] = array(
 
 // English
 $messages['en'] = array(
-  'notice'        => "Until <strong>{{{DATE}}} {{{TIME}}}</strong> other users get the warning that you're editing this page. You can extend this time period by clicking <em>Show preview</em>.",
+  'notice'        => "Until <strong>$1 $2</strong> other users get the warning that you're editing this page. You can extend this time period by clicking <em>Show preview</em>.",
   'warning'       => "User <strong>{{{USERNAME}}}</strong> opened this page for editing on <strong>{{{DATE}}} {{{TIME}}}</strong>. You shouldn't make any changes for the next <strong>{{{TIMEOUT}}} {{{MINSEC}}}</strong> to avoid edit conflicts.",
   'cancel'        => "You can leave this screen by clicking <em>Cancel</em>.",
   'canceled'      => "Canceled editing.",
@@ -54,9 +54,9 @@ $messages['en'] = array(
 
 // German
 $messages['de'] = array(
-  'notice'        => "Bis <strong>{{{DATE}}} {{{TIME}}}</strong> erhalten andere Benutzer die Warnung, dass Sie die Seite bearbeiten. Mit <em>Vorschau zeigen</em>, k&ouml;nnen Sie den Zeitraum verl&auml;ngern.",
+  'notice'        => "Bis '''$1 $2''' erhalten andere Benutzer die Warnung, dass Sie die Seite bearbeiten. Mit <em>Vorschau zeigen</em>, können Sie den Zeitraum verlängern.",
   'warning'       => "Der Benutzer <strong>{{{USERNAME}}}</strong> &ouml;ffnete diese Seite am <strong>{{{DATE}}} um {{{TIME}}}</strong> zum Bearbeiten. Sie sollten f&uuml;r die n&auml;chsten <strong>{{{TIMEOUT}}} {{{MINSEC}}}</strong> keine &Auml;nderungen vornehmen, um Bearbeitungskonflikte zu vermeiden.",
-  'cancel'        => "Sie k&ouml;nnen diese Seite &uuml;ber den Button <em>Abbrechen</em> verlassen.",
+  'cancel'        => "Sie können diese Seite über den Button <em>Abbrechen</em> verlassen.",
   'canceled'      => "Bearbeitung abgebrochen.",
   'minute'        => "Minute",
   'minutes'       => "Minuten",

@@ -25,173 +25,186 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-if(defined('MEDIAWIKI')) {
-  global $IP;
-  
-  define('EWDEBUG', false);
-  require_once $IP . "/extensions/EditWarning/EditWarning.class.php";
-  
-  $wgExtensionFunctions[] = 'fnEditwarning_init';
-  $wgExtensionCredits['other'][] = array(
-    'name'        => 'EditWarning',
-    'author'      => 'Thomas David',
-    'url'         => 'http://www.mediawiki.org/wiki/Extension:EditWarning',
-    'description' => 'Warns user editing a page that\'s currently being edited. (Version 0.3.1)'
-  );
+if (defined('MEDIAWIKI')) {
+    global $IP;
 
-  // Assign hooks to functions  
-  $wgHooks['AlternateEdit'][]        = 'fnEditWarning_edit';
-  $wgHooks['ArticleSave'][]          = 'fnEditWarning_save';
-  $wgHooks['UserLogout'][]           = 'fnEditWarning_logout';
-  $wgHooks['ArticleViewHeader'][]    = 'fnEditWarning_cancel';
-  
-  /**
-   * Inititalize EditWarning class
-   *
-   * @return: true
-   */
-  function fnEditWarning_init() {
-    if (EWDEBUG) error_log('----- fnEditWarning_init()');
-    global $wgRequest, $wgOut;
-    
-    // Add CSS styles to header
-    if ($wgRequest->getVal('action') == 'edit' || $wgRequest->getVal('action') == 'submit') {
-      $wgOut->addHeadItem('edit_css', '  <link href="extensions/EditWarning/article_edit.css" rel="stylesheet" type="text/css" />');
+    define('EWDEBUG', false);
+    require_once $IP . "/extensions/EditWarning/EditWarning.class.php";
+
+    $wgExtensionFunctions[] = 'fnEditWarning_init';
+    $wgExtensionCredits['other'][] = array(
+        'name'        => 'EditWarning',
+        'author'      => 'Thomas David',
+        'url'         => 'http://www.mediawiki.org/wiki/Extension:EditWarning',
+        'description' => 'Warns user editing a page that\'s currently being edited. (Version 0.3.1)'
+    );
+
+    // Assign hooks to functions
+    $wgHooks['AlternateEdit'][]   = 'fnEditWarning_edit';
+    $wgHooks['ArticleSave'][]     = 'fnEditWarning_remove';
+    $wgHooks['UserLogout'][]      = 'fnEditWarning_logout';
+    $wgHooks['ArticleViewHeader'][] = 'fnEditWarning_remove';
+
+    /**
+     * Initialize EditWarning extension
+     *
+     * @return boolean
+     *     Returns always true.
+     */
+    function fnEditWarning_init() {
+        global $wgMessageCache;
+        $messages = null;
+
+        // Load i18n messages
+        require_once dirname(__FILE__) . '/Messages.i18n.php';
+        foreach ($messages as $lang => $message)
+            $wgMessageCache->addMessages($message, $lang);
+
+        return true;
     }
-    $wgOut->addHeadItem('EditWarning', '  <link href="extensions/EditWarning/EditWarning.css" rel="stylesheet" type="text/css" />');
-    
-    return true;
-  }
-  
-  /**
-   * Action on editing page
-   *
-   * @hook: AlternateEdit
-   * @param: &$editpage
-   *   Editpage object
-   * @return true
-   */
-  function fnEditWarning_edit(&$editpage) {
-    if (EWDEBUG) error_log('----- fnEditWarning_edit()');
-    if ($editpage->mArticle->mTitle->getNamespace() == 'NS_MAIN') {
-        $article_title = $editpage->mArticle->mTitle->getPartialURL();
-    } else {
-        $article_title = $editpage->mArticle->mTitle->getNsText() . ":" . $editpage->mArticle->mTitle->getPartialURL();
+
+    /**
+     * Action if user opens article for editing
+     *
+     * @hook AlternateEdit
+     * @param &$editpage editpage object
+     * @return boolean
+     *     Returns always true
+     */
+    function fnEditWarning_edit(&$editpage) {
+        global $EditWarning_Timeout, $wgOut;
+
+        if ($editpage->mArticle->mTitle->getNamespace() == 'NS_MAIN') {
+            $article_title = $editpage->mArticle->mTitle->getPartialURL();
+        } else {
+            $article_title = $editpage->mArticle->mTitle->getNsText() . ":" . $editpage->mArticle->mTitle->getPartialURL();
+        }
+
+        $p = new EditWarning();
+        $p->load($editpage->mArticle->getID());
+
+        if ($p->isActive() || !$p->activeEditing()) {
+            //
+            // The current user is editing the article - show notice.
+            //
+            $p->save();
+            $timestamp = mktime(date("H"), date("i") + $EditWarning_Timeout, date("s"), date("m"), date("d"), date("Y"));
+            $tpl_param = array(
+                'NOTICE'       => wfMsg('notice'),
+                'CANCEL'        => wfMsg('cancel'),
+                'PAGENAME'      => $article_title,
+                'BUTTON_CANCEL' => wfMsg('button_cancel')
+            );
+            $msg_param = array(date("Y-m-d", $timestamp), date("H:i", $timestamp));
+            $html      = fnEditWarning_Template('notice', $tpl_param, $msg_param);
+        } else {
+            //
+            // Someone else is already editing the article - show warning.
+            //
+            $active_user = $p->getActiveUser();
+            $timestamp   = mktime(
+                date("H", $time_user),
+                date("i", $time_user) - $p->getTimeout(),
+                date("s", $time_user),
+                date("m", $time_user),
+                date("d", $time_user),
+                date("Y", $time_user)
+            );
+
+            // Calculate time to wait
+            $seconds_to_wait = floatval(abs(time() - $time_user));
+            $minutes_to_wait = bcdiv($seconds_to_wait, 60, 0);
+
+            $tpl_param = array(date('Y-m-d', $timestamp), date('H:i', $timestamp), $active_user['name']);
+            ($minutes_to_wait > 1 || $seconds_to_wait > 60) ? $tpl_param[] = wfMsg('minutes') : $tpl_param = wfMsg('seconds');
+            $html = fnEditWarning_Template('warning', $tpl_param);
+        }
+
+        $wgOut->addHtml($html);
+
+        return true;
     }
-    $p = EditWarning::getInstance($editpage->mArticle->getID());
-    $p->getEditor();
-    $p->setReplacementVar('PAGENAME', $article_title);
-    
-    if ($p->userActive() || $p->onlyUser() || !$p->activeEditing()) {
-      //
-      // The current user is editing the page - show notice
-      //
-      $timestamp = mktime(date("H"), date("i") + $p->getTimeout(), date("s"), date("m"), date("d"), date("Y"));
-      $p->setReplacementVar('DATE', date("Y-m-d", $timestamp));
-      $p->setReplacementVar('TIME', date("H:i", $timestamp));
-      $p->editorUpdate();
-      
-      $html = $p->processTemplate('notice');      
-    } else {
-      //
-      // The user opened the page after the active user - show warning
-      //
-      $active_user = $p->getActiveUser();
-      $time_user   = $active_user['timestamp'];
-      $timestamp   = mktime(date("H", $time_user), date("i", $time_user) - $p->getTimeout(), date("s", $time_user), date("m", $time_user), date("d", $time_user), date("Y", $time_user));
-      
-      // Calculate time to wait.
-      $difference   = floatval(abs(time() - $time_user));
-      $time_to_wait = bcdiv($difference, 60, 0);
-      
-      // Debug
-      if (EWDEBUG) {
-        error_log(sprintf('  difference:   %s seconds', $difference));
-        error_log(sprintf('  time_to_wait: %s minutes', $time_to_wait));
-      }
-      
-      $p->setReplacementVar('DATE',     date('Y-m-d', $timestamp));
-      $p->setReplacementVar('TIME',     date('H:i', $timestamp));
-      $p->setReplacementVar('USERNAME', $active_user['name']);
-      
-      if ($time_to_wait > 1 || $difference > 60) {
-        $p->setReplacementVar('MINSEC', $p->getReplacementMsg('MINUTES'));
-      } else {
-        $p->setReplacementVar('MINSEC', $p->getReplacementMsg('SECONDS'));
-        $time_to_wait = $difference;
-      }
-      
-      $p->setReplacementVar('TIMEOUT', $time_to_wait);      
-      $html = $p->processTemplate('warning'); 
+
+    /**
+     * Action on article save / editing abort
+     *
+     * @hook ArticleSave, ArticleViewHeader
+     * @param &$article Article object
+     * @return boolean
+     */
+    function fnEditWarning_remove(&$article, &$user = null, &$text = null, &$summary = null, &$minoredit = null, &$watchthis = null, &$sectionanchor = null, &$flags = null, $revision = null) {
+        global $wgRequest, $wgOut;
+
+        if ($user != null || $wgRequest->getVal('cancel') == true) {
+            $p = new EditWarning();
+            $p->load($article->getID());
+            try {
+                $p->remove();
+            } catch(Exception $e) {
+                if (EWDEBUG) error_log(sprintf('Error in fnEditWarning_save(): %s', $e));
+                return false;
+            }
+        }
+
+        // Show notice on edit abort.
+        if ($wgRequest->getVal('cancel') == true) {
+            $wgOut->addHtml(fnEditWarning_Template('canceled'));
+        }
+
+        return true;
     }
-    
-    $editpage->editFormPageTop .= $html;
-    
-    return true;
-  }
-  
-  /**
-   * Action on article save
-   *
-   * @hook: ArticleSave
-   * @param: &$article
-   *   Article object
-   * @return: boolean
-   *   Returns true if the page lock could be removed from DB.
-   *   Default return: false
-   */
-  function fnEditWarning_save(&$article, &$user, &$text, &$summary, &$minoredit, &$watchthis, &$sectionanchor, &$flags, $revision) {
-    if (EWDEBUG) error_log('----- fnEditWarning_save()');
-    $p = EditWarning::getInstance();
-    $p->setArticleID($article->getID());
-    
-    if ($p->deleteUser($p->getUserID())) { return true; }
-    
-    return false;
-  }
-  
-  /**
-   * Action if user cancels editing
-   *
-   * @hook: ArticleViewHeader
-   * @param: &$article
-   *   Article object
-   * @return: boolean
-   *   Returns false if the page lock couldn't be removed from DB.
-   *   Default return: true
-   */
-  function fnEditWarning_cancel(&$article) {
-    if (EWDEBUG) error_log('----- fnEditWarning_cancel()');
-    global $wgRequest, $wgOut;
-    
-    if ($wgRequest->getVal('cancel') == 'true') {
-      $p = EditWarning::getInstance();
-      $p->setArticleID($article->getID());
-      
-      if(!$p->deleteUser($p->getUserID())) { return false; }
-      
-      $wgOut->addHtml($p->processTemplate('canceled'));
+
+    /**
+     * Action on user logout
+     *
+     * @hook UserLogout
+     * @param $user User object
+     * @return boolean
+     */
+    function fnEditWarning_logout(&$user) {
+        $p = new EditWarning();
+        try {
+            $p->removeAll();
+        } catch(Exception $e) {
+            if (EWDEBUG) error_log(sprintf('Error in fnEditWarning_logout(): %s', $e));
+            return false;
+        }
+
+        return true;
     }
-    
-    return true;
-  }
-  
-  /**
-   * Remove all page locks on logout
-   *
-   * @hook: UserLogout
-   * @param: &$user
-   *   User object
-   * @return: boolean
-   *   Returns true if all page locks could be removed from DB.
-   *   Default return: false
-   */
-  function fnEditWarning_logout(&$user) {
-    if (EWDEBUG) error_log('----- fnEditWarning_logout()');
-    $p = EditWarning::getInstance();
-    
-    if ($p->deleteUserAll($p->getUserID())) { return true; }
-    
-    return false;
-  }  
+
+    //
+    // Helper functions
+    //
+
+    /**
+     * Returns template code
+     *
+     * @param $tpl_name Template name
+     * @param $tpl_param Template parameters
+     * @param $msg_param wfMsg parameters (optional)
+     * @return string Template code
+     */
+    function fnEditWarning_Template($tpl_name, $tpl_param, $msg_param = null) {
+        global $IP;
+
+        // Load template file
+        $file_name = $IP . "/extensions/EditWarning/tpl_" . $tpl_name . ".html";
+        if (!$file = fopen($file_name, "r")) {
+            throw new Exception(sprintf('Could\'t open the file %s.', $file_name));
+        }
+        if (!$tpl_content = fread($file, filesize($file_name))) {
+            throw new Exception(sprintf('Could\'t read from file %s.', $file_name));
+        }
+        if (!fclose($file)) {
+            throw new Exception(sprintf('Could\'t close the file %s.', $file_name));
+        }
+
+        // Include messages
+        foreach ($tpl_param as $param => $content) {
+            $tpl_content = preg_replace('/{{{' . $param . '}}}/', wfMsg($content, implode(',', $msg_param)), $tpl_content);
+        }
+
+        return $tpl_content;
+    }
 }

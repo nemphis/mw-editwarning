@@ -26,484 +26,487 @@
  */
 
 class EditWarning {
-  private static $_instance = null;
-  private $_article_id;
-  private $_user_id;
-  private $_user_name;
-  private $_editors;
-  private $_timeout;
-  private $_tpl_replacements = array("var" => array(), "msg" => array());
+    /**
+     * ID of the database entry
+     *
+     * @type int
+     * @access private
+     */
+    //private $_id;
 
-  private function __clone() {}
-  
-  public static function getInstance($article_id = null) {
-    if (EWDEBUG) error_log(sprintf('getInstance(%s)', $article_id));
-    if (self::$_instance == null) {
-      if (EWDEBUG) error_log('Create new EditWarning instance.');
-      self::$_instance = new EditWarning($article_id);
-    } else {
-      self::$_instance->setArticleID($article_id);
-    }
-    
-    return self::$_instance;
-  }
-  
-  protected function __construct(&$article_id = null) {
-    if (EWDEBUG) error_log(sprintf('Construct EditWarning. article_id: %s', $article_id)); 
-    global $IP, $wgUser, $wgLanguageCode, $wgRequest, $EditWarning_Timeout;
-    
-    if ($article_id != null) {
-      $this->_article_id = $article_id;
-    }
-    
-    $this->_user_id   = $wgUser->getID();
-    $this->_user_name = $wgUser->getName();
-    $timeout          = intval($EditWarning_Timeout);
-    
-    if ($timeout == '' || $timeout == null || $timeout <= 0) {
-      // Set default timeout to 10 minutes.
-      $this->_timeout = 10;
-    } else {
-      $this->_timeout = $timeout;
-    }
-    
-    // Load extension message strings
-    require_once $IP . "/extensions/EditWarning/Messages.i18n.php";
-    isset($messages[strtolower($wgLanguageCode)]) ? $lang = strtolower($wgLanguageCode) : $lang = "en";
-    
-    foreach($messages[$lang] as $key => $msg) {
-      $this->_tpl_replacements['msg'][strtoupper($key)] = $msg;
-    }
-    
-    // Debug
-    if (EWDEBUG) {
-      error_log('EditWarning vars:');
-      error_log(sprintf('  _article_id:       %s', $this->_article_id));
-      error_log(sprintf('  _user_id:          %s', $this->_user_id));
-      error_log(sprintf('  _user_name:        %s', $this->_user_name));
-      error_log(sprintf('  _editors:          %s', $this->_editors));
-      error_log(sprintf('  _timeout:          %s', $this->_timeout));
-    }
-    
-    return true;
-  }
-  
-  /**
-   * Returns article id.
-   *
-   * @access public
-   * @return int
-   */
-  public function getArticleID() {
-    return $this->_article_id;
-  }
-  
-  /**
-   * Returns user id.
-   *
-   * @access public
-   * @return int
-   */
-  public function getUserID() {
-    return $this->_user_id;
-  }
-  
-  /**
-   * Returns user name.
-   *
-   * @access public
-   * @return string
-   */
-  public function getUserName() {
-    return $this->_user_name;
-  }
-  
-  /**
-   * Returns timeout.
-   *
-   * @access public
-   * @return int
-   */
-  public function getTimeout() {
-    return $this->_timeout;
-  }
-  
-  /**
-   * Returns active user
-   *
-   * @access public
-   * @return array
-   */
-  public function getActiveUser() {
-    return $this->_editors['active'];
-  }
-  
-  public function getEditor() {
-    // Load article editors
-    if($this->_article_id != null) {
-      if($this->_getArticleEditor($this->_article_id)) { return true; }
-    }
-    
-    return false;
-  }
-  
-  /**
-   * Returns a i18n message
-   *
-   * @access public
-   * @return string
-   */
-  public function getReplacementMsg($name) {
-    return $this->_tpl_replacements['msg'][$name];
-  }
-  
-  /**
-   * Returns article editors
-   *
-   * @access private
-   * @return array
-   */
-  private function _getEditors() {
-    return $this->_editors;
-  }
-  
-  /**
-   * Returns template contents
-   *
-   * @access private
-   * @return string
-   */
-  private function _getTemplate($tpl_name) {
-    global $IP;
-    
-    $filename    = $IP . "/extensions/EditWarning/tpl_" . $tpl_name . ".html";
-    $file        = @fopen($filename, "r");
-    $tpl_content = @fread($file, filesize($filename));
-    @fclose($file);
-    
-    // Debug
-    if (EWDEBUG) {
-      error_log(sprintf('_getTemplate(%s): %s', $tpl_name, $filename));
-      if (!file) error_log('ERROR! Couldn\'t open template file!');
-      if (!tpl_content) error_log('ERROR! Couldn\'t read template file!');
-    }
-    
-    return $tpl_content;
-  }
-  
-  /**
-   * Sets article id
-   *
-   * @access public
-   * @param int article_id
-   * @return true
-   */
-  public function setArticleID($article_id) {
-    if (EWDEBUG) error_log(sprintf('Set _article_id to %s', $article_id));
-    $this->_article_id = $article_id;
-    
-    return true;
-  }
-  
-  /**
-   * Sets user values
-   *
-   * @access public
-   * @param array user
-   * @return true
-   */
-  public function setUser($user) {
-    $this->_user_id = $user['id'];
-    $this->_user_name = $user['name'];
-  }
-  
-  /**
-   * Set variable for replacement
-   *
-   * @access public
-   * @return true
-   */
-  public function setReplacementVar($name, $content) {
-    if (EWDEBUG) error_log(sprintf('Set _tpl_replacements[\'var\'][%s] to %s', $name, $content)); 
-    $this->_tpl_replacements['var'][$name] = $content;
-    return true;
-  }
-  
-  /**
-   * Loads template, replaces variables with i18n strings
-   *
-   * @access public
-   * @return string
-   */
-  public function processTemplate($tpl_name) {
-    if (EWDEBUG) error_log(sprintf('processTempate(%s)', $tpl_name));
-    $tpl_data = $this->_getTemplate($tpl_name);
-    
-    // Messages
-    foreach ($this->_tpl_replacements['msg'] as $msg => $replacement) {
-      $tpl_data = preg_replace("/{{{" . $msg . "}}}/", $replacement, $tpl_data);
-    }
-    // Variables
-    foreach ($this->_tpl_replacements['var'] as $var => $replacement) {
-      $tpl_data = preg_replace("/{{{" . $var . "}}}/", $replacement, $tpl_data);
-    }
-    
-    return $tpl_data;
-  }
-  
-  /**
-   * Gets article editor from DB and sets array _editors
-   *
-   * @access private
-   * @return true
-   */
-  private function _getArticleEditor($article_id) {
-    if (EWDEBUG) error_log(sprintf('_getArticleEditor(%s)', $article_id));
-    global $wgDBprefix;
-    
-    $editors   = array();
-    $dbr       =& wfGetDB(DB_SLAVE);
-    $page_id   = $this->getArticleID();
-    $timestamp = mktime(date("H"), date("i"), date("s"), date("m"), date("d"), date("Y"));
-    
-    // Debug
-    if (EWDEBUG) {
-      error_log(sprintf('  page_id:   %s', $page_id));
-      error_log(sprintf('  timestamp: %s (%s)', $timestamp, date('Y-m-d H:i:s', $timestamp)));
-    }
-    
-    $result    = $dbr->query(sprintf(
-      "SELECT * FROM `". $wgDBprefix . "current_edits`
-      WHERE `page_id` = '%s' AND `timestamp` >= '%s'
-      ORDER BY `timestamp` DESC",
-      $page_id, $timestamp
-    ));
-    
-    if (EWDEBUG && !$result) error_log('ERROR! Couldn\'t fetch editor from DB.');
-    
-    while ($row = $dbr->fetchObject($result)) {
-      if (EWDEBUG) error_log(sprintf('   %s [id: %s, timestamp: %s]', $row->user_name, $row->user_id, $row->timestamp));
-      $editors[$row->user_name] = array($row->user_id, $row->timestamp);
-      
-      // Save active user
-      $editors['active'] = array(
-        "name"      => $row->user_name,
-        "id"        => $row->user_id,
-        "timestamp" => $row->timestamp
-      );
-    }
-    
-    $dbr->freeResult($result);
-    $this->_editors = $editors;
-    
-    return true;
-  }
-  
-  /**
-   * Checks if the user is the only editor
-   *
-   * @access private
-   * @return boolean
-   *   Returns true if the user is the only editor.
-   *   Default return: false
-   */
-  public function onlyUser() {
-    $editors   = $this->_getEditors();
-    $user_id   = $this->getUserID();
-    $user_name = $this->getUserName();
-    
-    // Debug
-    if (EWDEBUG) {
-      error_log('onlyUser()');
-      error_log(sprintf('  editors count: %s', count($editors)));
-      error_log(sprintf('  first editor:  %s', $editors[$user_name][0]));
-      error_log(sprintf('  user_id:       %s', $user_id));
-      error_log(sprintf('  user_name:     %s', $user_name));
-    }
-    
-    if ((count($editors) == 1 && $editors[$user_name][0] == $user_id) || count($editors) == 0) {
-      if (EWDEBUG) error_log('RETURN true.');
-      return true;
-    }
-    
-    if (EWDEBUG) error_log('RETURN false');
-    return false;
-  }
-  
-  /**
-   * Checks if the user is the active user
-   *
-   * @access public
-   * @return boolean
-   *   Returns true if the user is editing the page.
-   *   Default return: false
-   */
-  public function userActive() {
-    $editors = $this->_getEditors();
-    $user_id = $this->getUserID();
-    
-    // Debug
-    if (EWDEBUG) {
-      error_log('userActive()');
-      error_log(sprintf('  active id: %s', $editors['active']['id']));
-      error_log(sprintf('  user_id:   %s', $user_id));
-    }
-    
-    if ($editors['active']['id'] == $user_id) {
-      if (EWDEBUG) error_log('RETURN true');
-      return true;
-    }
-    
-    if (EWDEBUG) error_log('RETURN false');
-    return false;
-  }
+    /**
+     * ID of the article which is edited
+     *
+     * @type int
+     * @access private
+     */
+    private $_article_id;
 
-  /**
-   * Checks if someone is editing the page
-   *
-   * @access public
-   * @return boolean
-   *   Returns true if someone is editing the page.
-   *   Default return: false
-   */
-  public function activeEditing() {
-    if (DEBUG) error_log('activeEditing()');
-    $editors = $this->_getEditors();
-    if (count($editors) == 0) {
-      if (EWDEBUG) error_log('RETURN false');
-      return false;
-    }
-    
-    if (EWDEBUG) error_log('RETURN true');
-    return true;
-  }
+    /**
+     * Array with users working on the article
+     *
+     * @type array
+     * @access private
+     */
+    private $_editors;
 
-  /**
-   * Checks if the user is editing the page.
-   *
-   * @access public
-   * @return boolean
-   *   Returns true if user has an entry.
-   *   Default return: false
-   */
-  public function userExists($editors) {
-    $editors   = $this->_getEditors();
-    $user_id   = $this->getUserID();
-    $user_name = $this->getUserName();
-    
-    if ($editors[$user_name][0] == $user_id) { return true; }
-    
-    return false;
-  }
-  
-  /**
-   * Update the editors for the page
-   *
-   * @access public
-   * @return boolean
-   *   Returns false if the user is anonymous
-   *   Default return: true
-   */
-  public function editorUpdate() {
-    if (EWDEBUG) error_log('editorUpdate()');
-    global $wgDBprefix;
-    
-    $dbr       =& wfGetDB( DB_SLAVE );
-    $timestamp = mktime(date("H"), date("i") + $this->getTimeout(), date("s"), date("m"), date("d"), date("Y"));
-    $page_id   = $this->getArticleID();
-    $user_id   = $this->getUserID();
-    $user_name = $this->getUserName();
-    
-    // Debug
-    if (EWDEBUG) {
-      error_log(sprintf('  timestamp: %s (%s)', $timestamp, date('Y-m-d H:i:s', $timestamp)));
-      error_log(sprintf('  page_id:   %s', $page_id));
-      error_log(sprintf('  user_id:   %s', $user_id));
-      error_log(sprintf('  user_name: %s', $user_name));
+    /**
+     * A lock/warning is only active until that timestamp
+     *
+     * @type int
+     * @access private
+     */
+    private $_timestamp;
+
+    /**
+     * The user defined number of minutes of the timeout.
+     *
+     * @type int
+     * @access private
+     */
+    private $_timeout;
+
+    /**
+     * ID of the current user
+     *
+     * @type int
+     * @access private
+     */
+    private $_current_user_id;
+
+    /**
+     * Name of the current user
+     *
+     * @type string
+     * @access private
+     */
+    private $_current_user_name;
+
+    public function __construct() {
+        global $wgUser, $EditWarning_Timeout;
+
+        $this->_id                = null;
+        $this->_article_id        = null;
+        $this->_editors           = null;
+        $this->_timestamp         = null;
+        $this->_current_user_id   = $wgUser->getID();
+        $this->_current_user_name = $wgUser->getName();
+        $timeout                  = $EditWarning_Timeout;
+
+        // Set timeout to default value of 10 minutes if unset or invalid
+        if ($this->_timeout == '' || $this->_timeout == null || $this->_timeout < 1) {
+            $this->_timeout = 10;
+        } else {
+            $this->_timeout = $timeout;
+        }
+
+        $this->_timestamp = mktime(date("H"), date("i") + $this->_timeout, date("s"), date("m"), date("d"), date("Y"));
     }
-    
-    // Don't save anonymous users or pages without id
-    if ($page_id == 0 || $user_id == 0) {
-      if (EWDEBUG) error_log('Anonymous user. Break.');
-      return false;
+
+    /**
+     * Gets the editor from the DB and sets all member variables
+     *
+     * @param article_id int
+     * @access public
+     * @return true
+     */
+    public function load($article_id) {
+        global $wgDBprefix;
+
+        $dbr       =& wfGetDB(DB_SLAVE);
+        $timestamp = mktime(date("H"), date("i"), date("s"), date("m"), date("d"), date("Y"));
+        // Get only page edits with timeout in the future.
+        if (!$result    = $dbr->query(sprintf(
+                "SELECT * FROM `". $wgDBprefix . "current_edits`
+                WHERE `page_id` = '%s' AND `timestamp` >= '%s'
+                ORDER BY `timestamp` DESC",
+                intval($article_id), $timestamp
+            ))) {
+            throw new Exception('Error while database query.');
+        }
+
+/*        if (!$num_result = mysql_num_rows($result)) {
+            throw new Exception('The query result is invalid!');
+        } elseif ($num_result == 0) {
+            $this->_active_editing = false;
+        } else {
+            $this->_active_editing = true;
+        }
+
+        $this->_id         = mysql_result($result, 0, 'id');
+        $this->_article_id = mysql_result($result, 0, 'article_id');
+        $this->_user_id    = mysql_result($result, 0, 'user_id');
+        $this->_user_name  = mysql_result($result, 0, 'user_name');
+        $this->_timeout    = mysql_result($result, 0, 'timeout');*/
+
+        $data = $dbr->fetchObject($result);
+
+        return true;
     }
-    
-    if ($this->userExists($this->_getEditors())) {
-      $result = $dbr->query(sprintf(
-        "UPDATE `" . $wgDBprefix . "current_edits`
-        SET `timestamp` = '%s'
-        WHERE `page_id` = '%s' AND `user_id` = '%s'",
-        $timestamp, $page_id, $user_id
-      ));
-    } else {
-      $result = $dbr->query(sprintf(
-        "INSERT `" . $wgDBprefix . "current_edits`
-        (`page_id`, `user_id`, `user_name`, `timestamp`) VALUES
-        ('%s', '%s', '%s', '%s')",
-        $page_id, $user_id, $user_name, $timestamp
-      ));
+
+    /**
+     * Returns the ID of the current article
+     *
+     * @access public
+     * @return int
+     */
+    public function getArticleID() {
+        if ($this->_article_id == null) {
+            throw new Exception('getArticleID() returns null. You should execute load() first.');
+        } else {
+            return $this->_article_id;
+        }
     }
-    
-    if (EWDEBUG && !$result) error_log('ERROR! Couldn\'t update editors!');
-    
-    return true;
-  }
-  
-  /**
-   * Remove the page lock of a user
-   *
-   * @param int user_id
-   * @return boolean
-   *   Return true if the removal was successfull.
-   *   Default return: false
-   */
-  public function deleteUser($user_id) {
-    if (EWDEBUG) error_log(sprintf('deleteUser(%s)', $user_id));
-    global $wgDBprefix;
-    
-    $dbr     =& wfGetDB(DB_SLAVE);
-    $page_id = $this->getArticleID();
-    $result  = $dbr->query(sprintf(
-      "DELETE FROM `" . $wgDBprefix . "current_edits`
-      WHERE `user_id` = '%s' AND `page_id` = '%s'",
-      $user_id, $page_id
-    ));
-    
-    if (EWDEBUG) error_log(sprintf('  page_id: %s', $page_id));
-    if ($result) {
-      if (EWDEBUG) error_log('RETURN true');
-      return true;
+
+    /**
+     * Sets the ID of the current article
+     *
+     * @access public
+     * @param id int
+     * @return boolean Returns always true.
+     */
+    public function setArticleID($id) {
+    	$this->_article_id = $id;
+    	return true;
     }
-    
-    if (EWDEBUG) error_log('ERROR! Couldn\'t delete page lock.');
-    return false;
-  }
-  
-  /**
-   * Remove all page locks of a user
-   *
-   * @param int user_id
-   * @return boolean
-   *   Return true if the removal was successfull.
-   *   Default return: false
-   */
-  public function deleteUserAll($user_id) {
-    if (EWDEBUG) error_log(sprintf('deleteUserAll(%s)', $user_id));
-    global $wgDBprefix;
-    
-    $dbr    =& wfGetDB(DB_SLAVE);
-    $result = $dbr->query(sprintf(
-      "DELETE FROM `" . $wgDBprefix . "current_edits`
-      WHERE `user_id` = '%s'",
-      $user_id
-    ));
-    
-    if($result) {
-      if (EWDEBUG) error_log('RETURN true');
-      return true;
+
+    /**
+     * Returns an array with the ID and name of the editing user
+     *
+     * @access public
+     * @return array or false if there is nobody editing the article
+     */
+    public function getEditor() {
+        if (count($this->_editors) > 1) {
+        	throw new Exception('There are working different users on the article. Use getSectionEditors() instead.');
+        } elseif (count($this->_editors) == 0) {
+        	return false;
+        } else {
+            return array('id' => $this->editors[0]['id'], 'name' => $this->editors[0]['id']);
+        }
     }
-    
-    if (EWDEBUG) error_log('ERROR! Couldn\'t remove all page locks.');
-    return false;
-  }
+
+    /**
+     * Returns an array with the ID and name of the user working on a section
+     *
+     * @access public
+     * @param section int Section ID
+     * @return array or false if there is nobody editing the section
+     */
+    public function getSectionEditor($section) {
+    	if (count($this->_editors) == 0) {
+    	    return false;
+    	} else {
+    	    foreach ($this->_editors as $editor) {
+    	        if ($editor['section'] == $section) {
+    	            return array('id' => $editor['id'], 'name' => $editor['name']);
+    	        }
+    	    }
+    	}
+
+    	return false;
+    }
+
+    /**
+     * Returns the full editors list
+     *
+     * @access public
+     * @return array Array of editors.
+     */
+    public function getEditorList() {
+        return $this->_editors;
+    }
+
+    /**
+     * Add user to editors list
+     *
+     * @access public
+     * @param id int ID of the user.
+     * @param name string Name of the user.
+     * @param [section] int ID of the section.
+     * @return boolean Returns always true.
+     */
+    public function addEditor($id, $name, $section = 0) {
+    	global $wgDBprefix;
+
+        // Check inputs
+        foreach ($this->_editors as $editor) {
+        	// Check if the user is already in the editors array.
+            if ($editor['id'] == $id && $editor['name'] == $name) {
+                throw new Exception(sprintf('Can\'t add user %s to editors: The user is already added to the editors list.', $name));
+            }
+            // Check if someone is already editing the whole article.
+            if ($editor['section'] == 0) {
+                throw new Exception(sprintf('Can\'t add user %s to editors: Another user is already editing the whole article.', $name));
+            }
+            // Check if someone is already editing the section.
+            if ($editor['section'] == $section) {
+                throw new Exception(sprintf('Can\'t add user %s to editors: Another user is already editing the section.', $name));
+            }
+        }
+
+        // Add user to editors array.
+        $this->_editors[] = array(
+            'id'      => $id,
+            'name'    => $name,
+            'section' => $section
+        );
+
+        $dbr       =& wfGetDB(DB_SLAVE);
+        $query     = sprintf(
+            "INSERT `%scurrent_edits`" .
+            "(`page_id`, `section`, `user_id`, `user_name`, `timestamp`) VALUES" .
+            "('%s', '%s', '%s', '%s', '%s')",
+            $wgDBprefix,
+            $this->getArticleID(),
+            $section,
+            $id,
+            $name,
+            $this->getTimestamp()
+        );
+
+        if (!$dbr->query($query)) {
+            throw new Exception('Error while saving editor to database.');
+        }
+
+        return true;
+    }
+
+    /**
+     * Update the timestamp of the given user
+     *
+     * @access public
+     * @param id int User ID.
+     * @return boolean Returns always true.
+     */
+    public function updateEditor($id) {
+        global $wgDBprefix;
+
+        $dbr       =& wfGetDB(DB_SLAVE);
+        $query     = sprintf(
+            "UPDATE `%scurrent_edits`" .
+            "SET `timestamp` = '%s'" .
+            "WHERE `user_id` = '%s' AND `page_id` = '%s'",
+            $wgDBprefix,
+            $this->getTimestamp(),
+            $id,
+            $this->getArticleID()
+        );
+
+        if (!$dbr->query($query)) {
+            throw new Exception('Error while updating editor.');
+        }
+
+        return true;
+    }
+
+    /**
+     * Remove user from editors list
+     *
+     * @access public
+     * @param id int User ID.
+     * @return boolean Returns always true.
+     */
+    public function removeEditor($id) {
+        global $wgDBprefix;
+
+        if(array_search($id, $this->getEditorList()) === FALSE) {
+            throw new Exception(sprintf('Could not remove editor: The user with the id %s was not found.', $id));
+        }
+
+        $dbr       =& wfGetDB(DB_SLAVE);
+        $query     = sprintf(
+            "DELETE FROM `%scurrent_edits`" .
+            "WHERE `user_id` = '%s' AND `page_id` = '%s'",
+            $wgDBprefix,
+            $id,
+            $this->getArticleID()
+        );
+
+        if (!$dbr->query($query)) {
+            throw new Exception('Error while removing editor.');
+        }
+
+        return true;
+    }
+
+    /**
+     * Returns the name of the editing user
+     *
+     * @access public
+     * @return string
+     */
+    /*public function getUserName() {
+        if ($this->_user_name == null) {
+            throw new Exception('getUserName() returns null. You should execute load() first.');
+        } else {
+            return $this->_user_name;
+        }
+    }*/
+
+    /**
+     * Returns an array with the values of the editing user
+     *
+     * @access public
+     * @return array
+     *     (_user_name, _timestamp)
+     */
+    public function getActiveUser() {
+        if ($this->_user_name == null || $this->_timestamp == null) {
+            throw new Exception('The object isn\'t initialized. You should execute load() first.');
+        } else {
+            return array(
+                'name'      => $this->_user_name,
+                'timestamp' => $this->_timestamp
+            );
+        }
+    }
+
+    /**
+     * Returns the timestamp of the editing user
+     *
+     * @access public
+     * @return int
+     */
+    public function getTimestamp() {
+        if ($this->_timestamp == null) {
+            throw new Exception('getTimestamp() returns null. You should execute load() first.');
+        } else {
+            return $this->_timestamp;
+        }
+    }
+
+    /**
+     * Checks if the current user is the active user
+     *
+     * @param user_id int
+     * @access public
+     * @return boolean
+     *     Returns true if the user is the active user or nobody is editing.
+     */
+    public function isActive() {
+        if ($this->_user_id == $this->_current_user_id || !activeEditing()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Checks if someone is editing the article
+     *
+     * @access public
+     * @return boolean
+     *     Returns the value of _active_editing.
+     */
+    public function activeEditing() {
+        if ($this->_active_editing == null) {
+            throw new Exception('activeEditing() returns null. You should execute load() first.');
+        } else {
+            return $this->_active_editing;
+        }
+    }
+
+    /**
+     * Set the timestamp of the editing user
+     *
+     * @param timestamp int
+     * @access public
+     * @return boolean
+     *     The function always returns true.
+     */
+    public function setTimestamp($timestamp) {
+        $this->_timestamp = $timestamp;
+        return true;
+    }
+
+    /**
+     * Saves the EditWarning object.
+     *
+     * @access public
+     * @return boolean
+     */
+    public function save() {
+        global $wgDBprefix;
+
+        $dbr &= wfGetDB(DB_SLAVE);
+        $timestamp = mktime(date("H"), date("i") + $this->_timeout, date("s"), date("m"), date("d"), date("Y"));
+
+        // Don't save anonymous users or articles without id
+        if ($this->_article_id == 0 || $this->_current_user_id == 0)
+            return false;
+
+        if ($this->isActive()) {
+            if ($this->activeEditing()) {
+                $result = $dbr->query(sprintf(
+                    "UPDATE `%scurrent_edits`
+                    SET `timestamp` = '%s'
+                    WHERE `page_id` = '%s' AND `user_id` = '%s'",
+                    $wgDBprefix, $timestamp, $this->_article_id, $this->_user_id
+                ));
+            } else {
+                $result = $dbr->query(sprintf(
+                    "INSERT `%scurrent_edits`
+                    (`page_id`, `user_id`, `user_name`, `timestamp`) VALUES
+                    ('%s', '%s', '%s', '%s')",
+                    $this->_article_id, $this->_current_user_id, $this->_current_user_name, $timestamp
+                ));
+            }
+        }
+
+        if (!$result) {
+            throw new Exception('Error while saving EditWarning object to database!');
+        }
+
+        return true;
+    }
+
+    /**
+     * Removes the entry from the DB
+     *
+     * @access public
+     * @return boolean
+     */
+    public function remove() {
+        global $wgDBprefix;
+
+        $dbr &= wfGetDB(DB_SLAVE);
+
+        if ($this->isActive()) {
+            $result = $dbr->query(sprintf(
+                "DELETE FROM `%scurrent_edits`
+                WHERE `page_id` = '%s' AND `user_id` = '%s'",
+                $wgDBprefix, $this->_article_id, $this->_user_id
+            ));
+        }
+
+        if (!result) {
+            throw new Exception('Could\'t remove EditWarning entry.');
+        }
+
+        return true;
+    }
+
+    /**
+     * Removes all entries of the current user
+     *
+     * @access public
+     * @return boolean
+     */
+    public function removeAll() {
+        global $wgDBprefix;
+
+        $dbr &= wfGetDB(DB_SLAVE);
+        $result = $dbr->query(sprintf(
+            "DELETE FROM `%scurrent_edits`
+            WHERE `user_id` = '%s'",
+            $wgDBprefix, $this->_current_user_id
+        ));
+
+        if (!result) {
+            throw new Exception('Could\'t remove user entries.');
+        }
+
+        return true;
+    }
 }
