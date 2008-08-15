@@ -11,8 +11,19 @@ class EditWarning {
 	 */
 	private $_editors = null;
 
-    public function __construct() {
+    /**
+     * Class constructor - loads editors if article id is set.
+     *
+     * @access public
+     * @param article_id Article ID. (optional)
+     * @return true
+     */
+    public function __construct($article_id = false) {
+    	if ($article_id) {
+    	    $this->load($article_id);
+    	}
 
+    	return true;
     }
 
     /**
@@ -38,8 +49,8 @@ class EditWarning {
     	$dbr       =& wfGetDB(DB_SLAVE);
         $timestamp = mktime(date("H"), date("i"), date("s"), date("m"), date("d"), date("Y"));
         $query = sprintf(
-            "SELECT * FROM `%scurrent_edits`" .
-            "WHERE `page_id` = '%s' AND `timestamp` >= '%s'" .
+            "SELECT * FROM `%scurrent_edits` " .
+            "WHERE `page_id` = '%s' AND `timestamp` >= '%s' " .
             "ORDER BY `timestamp` DESC",
             $wgDBprefix,
             $article_id,
@@ -63,9 +74,70 @@ class EditWarning {
         return true;
     }
 
-    // TODO: add() function to add a user to database.
+    /**
+     * This method adds a user to the database.
+     *
+     * @access public
+     * @param article_id Article ID.
+     * @param user_id User ID.
+     * @param name User name.
+     * @param timestamp Timeout of user editing.
+     * @param section ID of the section that the user is working on.
+     * @return boolean Return true, if no error occured.
+     */
+    public function add($article_id, $user_id, $user_name, $timestamp, $section) {
+        global $EditWarning_Timeout, $wgDBprefix;
 
-    // TODO: update() function to update the timestamp of a user.
+        $dbr       =& wfGetDB(DB_MASTER);
+        $timestamp = mktime(date("H"), date("i") + $EditWarning_Timeout, date("s"), date("m"), date("d"), date("Y"));
+        $query     = sprintf(
+            "INSERT `%scurrent_edits` " .
+            "(`page_id`, `section`, `user_id`, `user_name`, `timestamp`) VALUES " .
+            "('%s', '%s', '%s', '%s', '%s')",
+            $wgDBprefix,
+            $article_id,
+            $section,
+            $user_id,
+            $user_name,
+            $timestamp
+        );
+
+        if (!$result = $dbr->query($query)) {
+            throw new Exception("add(): Error while saving user to database.");
+        }
+
+        return true;
+    }
+
+    /**
+     * This function updates the timestamp of a editor.
+     *
+     * @access public
+     * @param article_id Article ID.
+     * @param user_id User ID.
+     * @return boolean Returns true, if no error occurs.
+     */
+    public function update($article_id, $user_id) {
+        global $EditWarning_Timeout, $wgDBprefix;
+
+        $dbr =& wfGetDB(DB_MASTER);
+        $timestamp = mktime(date("H"), date("i") + $EditWarning_Timeout, date("s"), date("m"), date("d"), date("Y"));
+        $query = sprintf(
+            "UPDATE `%scurrent_edits` " .
+            "SET `timestamp` = '%s' " .
+            "WHERE `page_id` = '%s' AND `user_id` = '%s'",
+            $wgDBprefix,
+            $timestamp,
+            $article_id,
+            $user_id
+        );
+
+        if (!$result = $dbr->query($query)) {
+            throw new Exception("update(): Error while updating user timestamp.");
+        }
+
+        return true;
+    }
 
     /**
      * Removes the pagelock of an editor for a certain article.
@@ -78,7 +150,7 @@ class EditWarning {
     public function remove($user_id, $article_id) {
     	global $wgDBprefix;
 
-    	$dbr   =& wfGetDB(DB_SLAVE);
+    	$dbr   =& wfGetDB(DB_MASTER);
     	$query = sprintf(
     	    "DELETE FROM `%scurrent_edits`" .
     	    "WHERE `user_id` = '%s' AND `page_id` = '%s'",
@@ -104,7 +176,7 @@ class EditWarning {
     public function removeAll($user_id) {
     	global $wgDBprefix;
 
-    	$dbr   =& wfGetDB(DB_SLAVE);
+    	$dbr   =& wfGetDB(DB_MASTER);
     	$query = sprintf(
     	    "DELETE FROM `%scurrent_edits`" .
     	    "WHERE `user_id` = '%s'",
@@ -164,15 +236,37 @@ class EditWarning {
      * @param int User ID.
      * @return boolean True, if the user is working on the article, else false
      */
-    public function isUserEditing($user_id) {
+    public function isUserEditingArticle($user_id) {
         if ($this->getEditors() == null) {
             throw new Exception("Error! The editors array is unset.");
         }
 
         foreach ($this->getEditors() as $editor) {
-            if ($editor['id'] == $user_id) {
+            if ($editor['id'] == $user_id && $editor['section'] == 0) {
                 return true;
             }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if a certain user is working on a section
+     *
+     * @access public
+     * @param int User ID.
+     * @param int Section ID.
+     * @return boolean True, if the user is working on the section, else false.
+     */
+    public function isUserEditingSection($user_id, $section_id) {
+        if ($this->getEditors() == null) {
+            throw new Exception("Error! The editors array is unset.");
+        }
+
+        foreach ($this->getEditors() as $editor) {
+        	if ($editor['id'] == $user_id && $editor['section'] == $section_id) {
+        	    return true;
+        	}
         }
 
         return false;
@@ -211,5 +305,3 @@ class EditWarning {
     	return false;
     }
 }
-
-?>

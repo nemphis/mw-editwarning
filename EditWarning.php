@@ -85,4 +85,63 @@ function fnEditWarning_getHTML($template, $msg, $vars = array()) {
     return $tpl_content;
 }
 
-?>
+/**
+ * Action on article editing
+ *
+ * @param editpage Editpage object.
+ * @return boolean Returns true, if no error occurs.
+ */
+function fnEditWarning_edit(&$editpage) {
+    global $wgUser, $wgRequest, $wgOut;
+
+    $user_id    = $wgUser->getID();
+    $section_id = intval($wgRequest->getVal('section'));
+
+    if ($editpage->mArticle->mTitle->getNamespace() == 'NS_MAIN') {
+    	$article_title = $editpage->mArticle->mTitle->getPartialURL();
+    } else {
+        $article_title = $editpage->mArticle->mTitle->getNsText() . ":" . $editpage->mArticle->mTitle->getPartialURL();
+    }
+
+    $p = new EditWarning($editpage->mArticle->getID());
+
+    if ($p->activeEditing()) {
+        // Someone is editing the article.
+
+        if (!$section_id) {
+            // The user wants to edit the whole article.
+
+            if ($p->sectionEditing()) {
+                // Someone is editing a section of the article - show warning.
+            } elseif ($p->isUserEditingArticle($user_id)) {
+                // The user is editing the article - show notice.
+            } else {
+                // Someone else is already editing the article - show warning.
+            }
+        } else {
+            // The user wants to edit a section of the article.
+
+            if ($p->sectionEditing()) {
+                // One or more sections are edited.
+
+                if ($p->isUserEditingSection($user_id, $section_id)) {
+                    // The user is editing the section - show notice.
+                } else {
+                    // Someone else is editing the section - show warning.
+                }
+            } else {
+                // Someone is editing the whole article.
+            }
+        }
+    } else {
+        // Nobody is editing the article.
+
+        if (!$section_id) {
+            // The user wants to edit the whole article.
+        } else {
+            // The user wants to edit a certain section of the article.
+        }
+    }
+
+    return true;
+}
