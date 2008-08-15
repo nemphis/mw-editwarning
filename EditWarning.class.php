@@ -63,6 +63,10 @@ class EditWarning {
         return true;
     }
 
+    // TODO: add() function to add a user to database.
+
+    // TODO: update() function to update the timestamp of a user.
+
     /**
      * Removes the pagelock of an editor for a certain article.
      *
@@ -151,6 +155,27 @@ class EditWarning {
     	}
 
     	return false;
+    }
+
+    /**
+     * Checks if a certain user is working on the article.
+     *
+     * @access public
+     * @param int User ID.
+     * @return boolean True, if the user is working on the article, else false
+     */
+    public function isUserEditing($user_id) {
+        if ($this->getEditors() == null) {
+            throw new Exception("Error! The editors array is unset.");
+        }
+
+        foreach ($this->getEditors() as $editor) {
+            if ($editor['id'] == $user_id) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
