@@ -29,37 +29,46 @@ $messages = array();
 
 /* Template. Just copy and translate. :)
 $messages['LANGCODE'] = array(
-  'notice'        => "",
-  'warning'       => "",
-  'cancel'        => "",
-  'canceled'      => "",
-  'minute'        => "",
-  'minutes'       => "",
-  'seconds'       => "",
-  'button_cancel' => ""
+  'ew-notice-article'      => "",
+  'ew-notice-section'      => "",
+  'ew-warning-article'     => "",
+  'ew-warning-section'     => "",
+  'ew-warning-sectionedit' => "",
+  'ew-cancel'              => "",
+  'ew-canceled'            => "",
+  'ew-minute'              => "",
+  'ew-minutes'             => "",
+  'ew-seconds'             => "",
+  'ew-button_cancel'       => ""
 );
 */
 
 // English
 $messages['en'] = array(
-  'notice'        => "Until <strong>$1 $2</strong> other users get the warning that you're editing this page. You can extend this time period by clicking <em>Show preview</em>.",
-  'warning'       => "User <strong>{{{USERNAME}}}</strong> opened this page for editing on <strong>{{{DATE}}} {{{TIME}}}</strong>. You shouldn't make any changes for the next <strong>{{{TIMEOUT}}} {{{MINSEC}}}</strong> to avoid edit conflicts.",
-  'cancel'        => "You can leave this screen by clicking <em>Cancel</em>.",
-  'canceled'      => "Canceled editing.",
-  'minute'        => "minute",
-  'minutes'       => "minutes",
-  'seconds'       => "seconds",
-  'button_cancel' => "Cancel"
+  'ew-notice-article'      => "Until <strong>$1 $2</strong> other users get the warning that you're editing this article. You can extend this time period by clicking <em>Show preview</em>.",
+  'ew-notice-section'      => "Until <strong>$1 $2</strong> other users get the warning that you're editing this section. You can extend this time period by clicking <em>Show preview</em>.",
+  'ew-warning-article'     => "User <strong>$1</strong> opened this page for editing on <strong>$2 $3</strong>. You shouldn't make any changes for the next <strong>$4 $5</strong> to avoid edit conflicts.",
+  'ew-warning-section'     => "User <strong>$1</strong> opened this section for editing on <strong>$2 $3</strong>. You shouldn't make any changes for the next <strong>$4 $5</strong> to avoid edit conflicts.",
+  'ew-warning-sectionedit' => "Someone is already working on a section of this article. Please edit a specific section or wait $1 $2 for bigger changes of this article, to avoid edit conflicts.",
+  'ew-cancel'              => "You can leave this screen by clicking <em>Cancel</em>.",
+  'ew-canceled'            => "Canceled editing.",
+  'ew-minute'              => "minute",
+  'ew-minutes'             => "minutes",
+  'ew-seconds'             => "seconds",
+  'ew-button_cancel'       => "Cancel"
 );
 
 // German
 $messages['de'] = array(
-  'notice'        => "Bis '''$1 $2''' erhalten andere Benutzer die Warnung, dass Sie die Seite bearbeiten. Mit <em>Vorschau zeigen</em>, können Sie den Zeitraum verlängern.",
-  'warning'       => "Der Benutzer <strong>{{{USERNAME}}}</strong> &ouml;ffnete diese Seite am <strong>{{{DATE}}} um {{{TIME}}}</strong> zum Bearbeiten. Sie sollten f&uuml;r die n&auml;chsten <strong>{{{TIMEOUT}}} {{{MINSEC}}}</strong> keine &Auml;nderungen vornehmen, um Bearbeitungskonflikte zu vermeiden.",
-  'cancel'        => "Sie können diese Seite über den Button <em>Abbrechen</em> verlassen.",
-  'canceled'      => "Bearbeitung abgebrochen.",
-  'minute'        => "Minute",
-  'minutes'       => "Minuten",
-  'seconds'       => "Sekunden",
-  'button_cancel' => "Abbrechen"
+  'ew-notice-article'      => "Bis <strong>$1 $2</strong> erhalten andere Benutzer die Warnung, dass Sie diesen Artikel bearbeiten. Mit <em>Vorschau zeigen</em>, können Sie den Zeitraum verlängern.",
+  'ew-notice-section'      => "Bis <strong>$1 $2</strong> erhalten andere Benutzer die Warnung, dass Sie diesen Abschnitt bearbeiten. Mit <em>Vorschau zeigen</em>, können Sie den Zeitraum verlängern.",
+  'ew-warning-article'     => "Der Benutzer <strong>$1</strong> öffnete diesen Artikel am <strong>$2 um $3</strong> zum Bearbeiten. Sie sollten für die nächsten <strong>$4 $5</strong> keine Änderungen vornemen, um Bearbeitungskonflikte zu vermeiden.",
+  'ew-warning-section'     => "Der Benutzer <strong>$1</strong> öffnete diesen Abschnitt am <strong>$2 um $3</strong> zum Bearbeiten. Sie sollten für die nächsten <strong>$4 $5</strong> keine Änderungen vornemen, um Bearbeitungskonflikte zu vermeiden.",
+  'ew-warning-sectionedit' => "An einem oder mehreren Abschnitten in diesem Artikel wird gerade gearbeitet. Bearbeiten Sie bitte einen bestimmten Abschnitt des Artikels oder warten Sie <strong>$1 $2</strong> für größere Änderungen, um Bearbeitungskonflikte zu vermeiden.",
+  'ew-cancel'              => "Sie können diese Seite über den Button <em>Abbrechen</em> verlassen.",
+  'ew-canceled'            => "Bearbeitung abgebrochen.",
+  'ew-minute'              => "Minute",
+  'ew-minutes'             => "Minuten",
+  'ew-seconds'             => "Sekunden",
+  'ew-button_cancel'       => "Abbrechen"
 );

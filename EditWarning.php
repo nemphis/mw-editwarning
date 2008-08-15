@@ -50,6 +50,27 @@ function fnEditWarning_init() {
 }
 
 /**
+ * Gets config vars
+ *
+ * @param string Config subject
+ * @return mixed Config value
+ */
+function fnEditWarning_getConfig($config_subject) {
+    global $wgEditWarningTimeout;
+
+    switch($config_subject) {
+        case "timeout":
+            if ($wgEditWarningTimeout < 1) {
+                // $wgEditWarningTimeout has to be at least 1. If not, set to default value of 10.
+                $wgEditWarningTimeout = 10;
+            }
+
+            return $wgEditWarningTimeout;
+            break;
+    }
+}
+
+/**
  * Loads HTML template and includes messsages
  *
  * @param string Template name.
