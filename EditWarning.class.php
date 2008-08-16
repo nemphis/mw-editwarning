@@ -81,15 +81,13 @@ class EditWarning {
      * @param article_id Article ID.
      * @param user_id User ID.
      * @param name User name.
-     * @param timestamp Timeout of user editing.
-     * @param section ID of the section that the user is working on.
+     * @param section ID of the section that the user is working on. (optional)
      * @return boolean Return true, if no error occured.
      */
-    public function add($article_id, $user_id, $user_name, $timestamp, $section) {
+    public function add($article_id, $user_id, $user_name, $timestamp, $section = 0) {
         global $EditWarning_Timeout, $wgDBprefix;
 
         $dbr       =& wfGetDB(DB_MASTER);
-        $timestamp = mktime(date("H"), date("i") + $EditWarning_Timeout, date("s"), date("m"), date("d"), date("Y"));
         $query     = sprintf(
             "INSERT `%scurrent_edits` " .
             "(`page_id`, `section`, `user_id`, `user_name`, `timestamp`) VALUES " .

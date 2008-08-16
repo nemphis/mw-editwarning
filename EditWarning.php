@@ -98,10 +98,8 @@ function fnEditWarning_getHTML($template, $msg, $vars = array()) {
         $tpl_content = preg_replace('/{{{' . $var . '}}}/', $value);
     }
 
-    // Include messages
-    foreach ($msg as $var => $message) {
-        $tpl_content = preg_replace('/{{{' . $var . '}}}/', $message);
-    }
+    // Include message
+    $tpl_content = preg_replace('/{{{MSG}}}/', $msg);
 
     return $tpl_content;
 }
@@ -109,14 +107,19 @@ function fnEditWarning_getHTML($template, $msg, $vars = array()) {
 /**
  * Action on article editing
  *
+ * @hook AlternateEdit
  * @param editpage Editpage object.
  * @return boolean Returns true, if no error occurs.
  */
 function fnEditWarning_edit(&$editpage) {
     global $wgUser, $wgRequest, $wgOut;
 
+    $article_id = $editpage->mArticle->getID();
+    $p          = new EditWarning($article_id);
+    $editors    = $p->getEditors();
     $user_id    = $wgUser->getID();
     $section_id = intval($wgRequest->getVal('section'));
+    $timeout    = fnEditWarning_getConfig('timeout');
 
     if ($editpage->mArticle->mTitle->getNamespace() == 'NS_MAIN') {
     	$article_title = $editpage->mArticle->mTitle->getPartialURL();
@@ -124,45 +127,238 @@ function fnEditWarning_edit(&$editpage) {
         $article_title = $editpage->mArticle->mTitle->getNsText() . ":" . $editpage->mArticle->mTitle->getPartialURL();
     }
 
-    $p = new EditWarning($editpage->mArticle->getID());
+    $article_url = $_SERVER['PHP_SELF'] . "?title=" . $article_title;
+
+    $tpl_vars = array(
+        'URL'           => $article_url,
+        'BUTTON_CANCEL' => wfMsg('ew-button-cancel')
+    );
 
     if ($p->activeEditing()) {
+    	//
         // Someone is editing the article.
+        //
 
         if (!$section_id) {
+        	//
             // The user wants to edit the whole article.
+            //
 
             if ($p->sectionEditing()) {
+            	//
                 // Someone is editing a section of the article - show warning.
-            } elseif ($p->isUserEditingArticle($user_id)) {
-                // The user is editing the article - show notice.
+                //
+
+                // Get newest timestamp
+                $timestamp = 0;
+                foreach ($editors as $editor) {
+                    if ($editor['section'] == $section_id && $editor['timestamp'] > $timestamp) {
+                        $timestamp = $editor['timestamp'];
+                    }
+                }
+
+                // Timestamp when the editor was last seen.
+                $edit_time = mktime(
+                    date("H", $timestamp),
+                    date("i", $timestamp) - $timeout,
+                    date("s", $timestamp),
+                    date("m", $timestamp),
+                    date("d", $timestamp),
+                    date("Y", $timestamp)
+                );
+
+                // Calculate time to wait.
+                $seconds_to_wait = floatval(abs(time() - $timestamp));
+                $minutes_to_wait = bcdiv($seconds_to_wait, 60, 0);
+
+                if ($minutes_to_wait > 1 || $seconds_to_wait > 60) {
+                	$message = wfMsg('ew-warning-sectionedit', $minutes_to_wait, wfMsg('ew-minutes'));
+                } else {
+                    $message = wfMsg('ew-warning-sectionedit', $seconds_to_wait, wfMsg('ew-seconds'));
+                }
+
+                $html = fnEditWarning_getHTML('warning', $message, $tpl_vars);
             } else {
-                // Someone else is already editing the article - show warning.
+            	//
+            	// Someone is editing the whole article.
+            	//
+
+            	if ($p->isUserEditingArticle($user_id)) {
+            	    //
+                    // The user is editing the article - show notice.
+                    //
+
+                    $timestamp = mktime(date("H"), date("i") + $timeout, date("s"), date("m"), date("d"), date("Y"));
+                    $p->update($article_id, $user_id);
+                    $message = wfMsg('ew-notice-article', date("Y-m-d", $timestamp), date("H:i", $timestamp));
+                    $html    = fnEditWarning_getHTML('notice', $message, $tpl_vars);
+            	} else {
+            	    //
+            	    // Someone else is already editing the article - show warning.
+            	    //
+
+                    $editor = $p->getArticleEditor();
+                    $edit_timeout = mktime(
+                        date("H", $editor['timestamp']),
+                        date("i", $editor['timestamp']) - $timeout,
+                        date("s", $editor['timestamp']),
+                        date("m", $editor['timestamp']),
+                        date("d", $editor['timestamp']),
+                        date("Y", $editor['timestamp'])
+                    );
+
+            	    // Calculate time to wait
+                    $seconds_to_wait = floatval(abs(time() - $edit_timeout));
+                    $minutes_to_wait = bcdiv($seconds_to_wait, 60, 0);
+
+                    if ($minutes_to_wait > 1 || $seconds_to_wait > 60) {
+                        $message = wfMsg('ew-warning-article', $minutes_to_wait, wfMsg('ew-minutes'));
+                    } else {
+                        $message = wfMsg('ew-warning-article', $seconds_to_wait, wfMsg('ew-seconds'));
+                    }
+
+                    $html = fnEditWarning_getHTML('notice', $message, $tpl_vars);
+            	}
             }
         } else {
+        	//
             // The user wants to edit a section of the article.
+            //
 
             if ($p->sectionEditing()) {
+            	//
                 // One or more sections are edited.
+                //
 
                 if ($p->isUserEditingSection($user_id, $section_id)) {
+                	//
                     // The user is editing the section - show notice.
+                    //
+
+                    $timestamp = mktime(date('H'), date('i') + $timeout, date('s'), date('m'), date('d'), date('Y'));
+                    $p->update($article_id, $user_id);
+                    $message = wfMsg('ew-notice-section', date("Y-m-d", $timestamp), date("H:i", $timestamp));
+                    $html    = fnEditWarning_getHTML('notice', $message, $tpl_vars);
                 } else {
+                	//
                     // Someone else is editing the section - show warning.
+                    //
+
+                    $editor       = $p->getSectionEditor($section_id);
+                    $edit_timeout = mktime(
+                        date('H', $editor['timestamp']),
+                        date('i', $editor['timestamp']) - $timeout,
+                        date('s', $editor['timestamp']),
+                        date('m', $editor['timestamp']),
+                        date('d', $editor['timestamp']),
+                        date('Y', $editor['timestamp'])
+                    );
+
+            	    // Calculate time to wait
+                    $seconds_to_wait = floatval(abs(time() - $edit_timeout));
+                    $minutes_to_wait = bcdiv($seconds_to_wait, 60, 0);
+
+                    if ($minutes_to_wait > 1 || $seconds_to_wait > 60) {
+                        $message = wfMsg('ew-warning-section', $editor['name'], $minutes_to_wait, wfMsg('ew-minutes'));
+                    } else {
+                        $message = wfMsg('ew-warning-section', $editor['name'], $seconds_to_wait, wfMsg('ew-seconds'));
+                    }
+
+                    $html = fnEditWarning_getHTML('warning', $message, $tpl_vars);
                 }
             } else {
+            	//
                 // Someone is editing the whole article.
+                //
+
+                $editor = $p->getArticleEditor();
+                $edit_timeout = mktime(
+                    date('H', $editor['timestamp']),
+                    date('i', $editor['timestamp']) - $timeout,
+                    date('s', $editor['timestamp']),
+                    date('m', $editor['timestamp']),
+                    date('d', $editor['timestamp']),
+                    date('Y', $editor['timestamp'])
+                );
+
+                // Calculate time to wait
+                $seconds_to_wait = floatval(abs(time() - $edit_timeout));
+                $minutes_to_wait = bcdiv($seconds_to_wait, 60, 0);
+
+                if ($minutes_to_wait > 1 || $seconds_to_wait > 60) {
+                	$message = wfMsg('ew-warning-article', $editor['name'], $minutes_to_wait, wfMsg('ew-minutes'));
+                } else {
+                    $message = wfMsg('ew-warning-article', $editor['name'], $seconds_to_wait, wfMsg('ew-seconds'));
+                }
+
+                $html = fnEditWarning_getHTML('warning', $message, $tpl_vars);
             }
         }
     } else {
+    	//
         // Nobody is editing the article.
+        //
+
+        $user_name = $wgUser->getName();
+        $timestamp = mktime(date("H"), date("i") + $timeout, date("s"), date("m"), date("d"), date("Y"));
 
         if (!$section_id) {
+        	//
             // The user wants to edit the whole article.
+            //
+
+            $p->add($article_id, $user_id, $user_name, $timeout);
+            $message = wfMsg('ew-notice-article', date("Y-m-d", $timestamp), date("H:i", $timestamp));
         } else {
+        	//
             // The user wants to edit a certain section of the article.
+            //
+
+            $p->add($article_id, $user_id, $user_name, $timeout, $section_id);
+            $message = wfMsg('ew-notice-section', date("Y-m-d", $timestamp), date("H:i", $timestamp));
         }
+
+        $html = fnEditWarning_getHTML('notice', $message, $tpl_vars);
     }
+
+    $wgOut->addHtml($html);
+
+    return true;
+}
+
+/**
+ * Action if article is saved or editing is aborted.
+ *
+ * @hook ArticleSave
+ * @param
+ * @return boolean Returns true, if no error occurs.
+ */
+function fnEditWarning_remove(&$article, &$user, &$text, &$summary, $minor, $watch, $sectionanchor, &$flags) {
+	global $wgRequest, $wgUser, $wgOut;
+
+    $user_id    = $wgUser->getID();
+	$article_id = $article->mTitle->getID();
+	$p = new EditWarning($article_id);
+	$p->remove($user_id, $article_id);
+
+	if ($wgRequest->getVal('cancel') == "true") {
+	    // The user has aborted editing - show message.
+	    $message = wfMsg('ew-canceled');
+	    $wgOut->addHtml(fnEditWarning_getHTML('canceled', $message));
+	}
+
+	return true;
+}
+
+/**
+ * Action on user logout.
+ *
+ * @hook UserLogout
+ * @param user User object.
+ * @return boolean Returns true, if no error occurs.
+ */
+function fnEditWarning_logout(&$user) {
+    EditWarning::removeAll($user->getID());
 
     return true;
 }
