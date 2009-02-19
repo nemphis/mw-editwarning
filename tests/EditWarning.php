@@ -6,7 +6,7 @@ require_once("Mock_DatabaseConnection.php");
 
 Mock::generate('DatabaseConnection');
 
-class EditWarningTest extends UnitTestCase {
+class EditWarning_FunctionalTests extends UnitTestCase {
 
     private $p;
     private $_connection;
@@ -102,11 +102,7 @@ class EditWarningTest extends UnitTestCase {
      * - There are locks of other articles and sections by other users.
      */
     public function testArticleEditing_NobodyCase3() {
-    	// TODO: Remove redundant code
-        $connection = &new MockDatabaseConnection();
-        $request = "ARTICLE_LOCKS";
-        $argument = array( "editwarning_locks", "*", "`article_id` = '1'" );
-        $values = array(
+        $this->_values = array(
           array(
             'id'         => 1,
             'user_id'    => 4,
@@ -129,13 +125,9 @@ class EditWarningTest extends UnitTestCase {
             'section'    => 1
           )
         );
+        $this->setDBvalues();
 
-        $connection->setReturnValue( 'select', $request, $argument );
-        $connection->setReturnReferenceAt( 0, 'fetchRow', $values[0], $request );
-        $connection->setReturnReferenceAt( 1, 'fetchRow', $values[1], $request );
-        $connection->setReturnReferenceAt( 2, 'fetchRow', $values[2], $request );
-
-        $this->p->load( $connection, 1 );
+        $this->p->load( $this->_connection, 1 );
         $this->assertFalse( $this->p->anyLock() );
         $this->assertFalse( $this->p->articleLock() );
         $this->assertFalse( $this->p->articleUserLock() );
@@ -151,10 +143,7 @@ class EditWarningTest extends UnitTestCase {
      * - There are locks of other articles and sections by the user.
      */
     public function testArticleEditing_NobodyCase4() {
-        $connection = &new MockDatabaseConnection();
-        $request = "ARTICLE_LOCKS";
-        $argument = array( "editwarning_locks", "*", "`article_id` = '1'" );
-        $values = array(
+        $this->_values = array(
           array(
             'id'         => 1,
             'user_id'    => 3,
@@ -177,13 +166,9 @@ class EditWarningTest extends UnitTestCase {
             'section'    => 1
           )
         );
+        $this->setDBvalues();
 
-        $connection->setReturnValue( 'select', $request, $argument );
-        $connection->setReturnReferenceAt( 0, 'fetchRow', $values[0], $request );
-        $connection->setReturnReferenceAt( 1, 'fetchRow', $values[1], $request );
-        $connection->setReturnReferenceAt( 2, 'fetchRow', $values[2], $request );
-
-        $this->p->load( $connection, 1 );
+        $this->p->load( $this->_connection, 1 );
         $this->assertFalse( $this->p->anyLock() );
         $this->assertFalse( $this->p->articleLock() );
         $this->assertFalse( $this->p->articleUserLock() );
@@ -199,10 +184,7 @@ class EditWarningTest extends UnitTestCase {
      * - There are locks of other articles and sections by the user.
      */
     public function testArticleEditing_NobodyCase5() {
-        $connection = &new MockDatabaseConnection();
-        $request = "ARTICLE_LOCKS";
-        $argument = array( "editwarning_locks", "*", "`article_id` = '1'" );
-        $values = array(
+        $this->_values = array(
           array(
             'id'         => 1,
             'user_id'    => 4,
@@ -225,13 +207,9 @@ class EditWarningTest extends UnitTestCase {
             'section'    => 1
           )
         );
+        $this->setDBvalues();
 
-        $connection->setReturnValue( 'select', $request, $argument );
-        $connection->setReturnReferenceAt( 0, 'fetchRow', $values[0], $request );
-        $connection->setReturnReferenceAt( 1, 'fetchRow', $values[1], $request );
-        $connection->setReturnReferenceAt( 2, 'fetchRow', $values[2], $request );
-
-        $this->p->load( $connection, 1 );
+        $this->p->load( $this->_connection, 1 );
         $this->assertFalse( $this->p->anyLock() );
         $this->assertFalse( $this->p->articleLock() );
         $this->assertFalse( $this->p->articleUserLock() );
@@ -248,10 +226,7 @@ class EditWarningTest extends UnitTestCase {
      * - There's only an article lock by the user.
      */
     public function testArticleEditing_HimselfCase1() {
-        $connection = &new MockDatabaseConnection();
-        $request = "ARTICLE_LOCKS";
-        $argument = array( "editwarning_locks", "*", "`article_id` = '1'" );
-        $values = array(
+        $this->_values = array(
           array(
             'id'         => 1,
             'user_id'    => 3,
@@ -260,11 +235,9 @@ class EditWarningTest extends UnitTestCase {
             'section'    => 0
           )
         );
+        $this->setDBvalues();
 
-        $connection->setReturnValue( 'select', $request, $argument );
-        $connection->setReturnReferenceAt( 0, 'fetchRow', $values[0], $request );
-
-        $this->p->load( $connection, 1 );
+        $this->p->load( $this->_connection, 1 );
         $this->assertTrue( $this->p->anyLock() );
         $this->assertTrue( $this->p->articleLock() );
         $this->assertTrue( $this->p->articleUserLock() );
@@ -280,10 +253,7 @@ class EditWarningTest extends UnitTestCase {
      * - There are locks of other articles and sections by other users.
      */
     public function testArticleEditing_HimselfCase2() {
-        $connection = &new MockDatabaseConnection();
-        $request = "ARTICLE_LOCKS";
-        $argument = array( "editwarning_locks", "*", "`article_id` = '1'" );
-        $values = array(
+        $this->_values = array(
           array(
             'id'         => 1,
             'user_id'    => 3,
@@ -306,13 +276,9 @@ class EditWarningTest extends UnitTestCase {
             'section'    => 1
           )
         );
+        $this->setDBvalues();
 
-        $connection->setReturnValue( 'select', $request, $argument );
-        $connection->setReturnReferenceAt( 0, 'fetchRow', $values[0], $request );
-        $connection->setReturnReferenceAt( 1, 'fetchRow', $values[1], $request );
-        $connection->setReturnReferenceAt( 2, 'fetchRow', $values[2], $request );
-
-        $this->p->load( $connection, 1 );
+        $this->p->load( $this->_connection, 1 );
         $this->assertTrue( $this->p->anyLock() );
         $this->assertTrue( $this->p->articleLock() );
         $this->assertTrue( $this->p->articleUserLock() );
@@ -328,10 +294,7 @@ class EditWarningTest extends UnitTestCase {
      * - There are locks of other articles and sections by the user.
      */
     public function testArticleEditing_HimselfCase3() {
-        $connection = &new MockDatabaseConnection();
-        $request = "ARTICLE_LOCKS";
-        $argument = array( "editwarning_locks", "*", "`article_id` = '1'" );
-        $values = array(
+        $this->_values = array(
           array(
             'id'         => 1,
             'user_id'    => 3,
@@ -354,13 +317,9 @@ class EditWarningTest extends UnitTestCase {
             'section'    => 1
           )
         );
+        $this->setDBvalues();
 
-        $connection->setReturnValue( 'select', $request, $argument );
-        $connection->setReturnReferenceAt( 0, 'fetchRow', $values[0], $request );
-        $connection->setReturnReferenceAt( 1, 'fetchRow', $values[1], $request );
-        $connection->setReturnReferenceAt( 2, 'fetchRow', $values[2], $request );
-
-        $this->p->load( $connection, 1 );
+        $this->p->load( $this->_connection, 1 );
         $this->assertTrue( $this->p->anyLock() );
         $this->assertTrue( $this->p->articleLock() );
         $this->assertTrue( $this->p->articleUserLock() );
@@ -377,10 +336,7 @@ class EditWarningTest extends UnitTestCase {
      * - There's only an article lock by someone else.
      */
     public function testArticleEditing_ArticleConflictCase1() {
-        $connection = &new MockDatabaseConnection();
-        $request = "ARTICLE_LOCKS";
-        $argument = array( "editwarning_locks", "*", "`article_id` = '1'" );
-        $values = array(
+        $this->_values = array(
           array(
             'id'         => 1,
             'user_id'    => 4,
@@ -389,13 +345,9 @@ class EditWarningTest extends UnitTestCase {
             'section'    => 0
           )
         );
+        $this->setDBvalues();
 
-        $connection->setReturnValue( 'select', $request, $argument );
-        $connection->setReturnReferenceAt( 0, 'fetchRow', $values[0], $request );
-        $connection->setReturnReferenceAt( 1, 'fetchRow', $values[1], $request );
-        $connection->setReturnReferenceAt( 2, 'fetchRow', $values[2], $request );
-
-        $this->p->load( $connection, 1 );
+        $this->p->load( $this->_connection, 1 );
         $this->assertTrue( $this->p->anyLock() );
         $this->assertTrue( $this->p->articleLock() );
         $this->assertFalse( $this->p->articleUserLock() );
@@ -411,10 +363,7 @@ class EditWarningTest extends UnitTestCase {
      * - There are locks of other articles and sections by other users.
      */
     public function testArticleEditing_ArticleConflictCase2() {
-        $connection = &new MockDatabaseConnection();
-        $request = "ARTICLE_LOCKS";
-        $argument = array( "editwarning_locks", "*", "`article_id` = '1'" );
-        $values = array(
+        $this->_values = array(
           array(
             'id'         => 1,
             'user_id'    => 4,
@@ -437,13 +386,9 @@ class EditWarningTest extends UnitTestCase {
             'section'    => 0
           )
         );
+        $this->setDBvalues();
 
-        $connection->setReturnValue( 'select', $request, $argument );
-        $connection->setReturnReferenceAt( 0, 'fetchRow', $values[0], $request );
-        $connection->setReturnReferenceAt( 1, 'fetchRow', $values[1], $request );
-        $connection->setReturnReferenceAt( 2, 'fetchRow', $values[2], $request );
-
-        $this->p->load( $connection, 1 );
+        $this->p->load( $this->_connection, 1 );
         $this->assertTrue( $this->p->anyLock() );
         $this->assertTrue( $this->p->articleLock() );
         $this->assertFalse( $this->p->articleUserLock() );
@@ -459,10 +404,7 @@ class EditWarningTest extends UnitTestCase {
      * - There are locks of other articles and sections by the user.
      */
     public function testArticleEditing_ArticleConflictCase3() {
-                $connection = &new MockDatabaseConnection();
-        $request = "ARTICLE_LOCKS";
-        $argument = array( "editwarning_locks", "*", "`article_id` = '1'" );
-        $values = array(
+        $this->_values = array(
           array(
             'id'         => 1,
             'user_id'    => 4,
@@ -485,13 +427,9 @@ class EditWarningTest extends UnitTestCase {
             'section'    => 0
           )
         );
+        $this->setDBvalues();
 
-        $connection->setReturnValue( 'select', $request, $argument );
-        $connection->setReturnReferenceAt( 0, 'fetchRow', $values[0], $request );
-        $connection->setReturnReferenceAt( 1, 'fetchRow', $values[1], $request );
-        $connection->setReturnReferenceAt( 2, 'fetchRow', $values[2], $request );
-
-        $this->p->load( $connection, 1 );
+        $this->p->load( $this->_connection, 1 );
         $this->assertTrue( $this->p->anyLock() );
         $this->assertTrue( $this->p->articleLock() );
         $this->assertFalse( $this->p->articleUserLock() );
@@ -508,10 +446,7 @@ class EditWarningTest extends UnitTestCase {
      * - There's only an section lock by someone else.
      */
     public function testArticleEditing_SectionConflictCase1() {
-        $connection = &new MockDatabaseConnection();
-        $request = "ARTICLE_LOCKS";
-        $argument = array( "editwarning_locks", "*", "`article_id` = '1'" );
-        $values = array(
+        $this->_values = array(
           array(
             'id'         => 1,
             'user_id'    => 4,
@@ -520,11 +455,9 @@ class EditWarningTest extends UnitTestCase {
             'section'    => 1
           )
         );
+        $this->setDBvalues();
 
-        $connection->setReturnValue( 'select', $request, $argument );
-        $connection->setReturnReferenceAt( 0, 'fetchRow', $values[0], $request );
-
-        $this->p->load( $connection, 1 );
+        $this->p->load( $this->_connection, 1 );
         $this->assertTrue( $this->p->anyLock() );
         $this->assertFalse( $this->p->articleLock() );
         $this->assertFalse( $this->p->articleUserLock() );
@@ -540,10 +473,7 @@ class EditWarningTest extends UnitTestCase {
      * - There are locks of other articles and sections by other users.
      */
     public function testArticleEditing_SectionConflictCase2() {
-        $connection = &new MockDatabaseConnection();
-        $request = "ARTICLE_LOCKS";
-        $argument = array( "editwarning_locks", "*", "`article_id` = '1'" );
-        $values = array(
+        $this->_values = array(
           array(
             'id'         => 1,
             'user_id'    => 4,
@@ -566,13 +496,9 @@ class EditWarningTest extends UnitTestCase {
             'section'    => 1
           )
         );
+        $this->setDBvalues();
 
-        $connection->setReturnValue( 'select', $request, $argument );
-        $connection->setReturnReferenceAt( 0, 'fetchRow', $values[0], $request );
-        $connection->setReturnReferenceAt( 1, 'fetchRow', $values[1], $request );
-        $connection->setReturnReferenceAt( 2, 'fetchRow', $values[2], $request );
-
-        $this->p->load( $connection, 1 );
+        $this->p->load( $this->_connection, 1 );
         $this->assertTrue( $this->p->anyLock() );
         $this->assertFalse( $this->p->articleLock() );
         $this->assertFalse( $this->p->articleUserLock() );
@@ -588,10 +514,7 @@ class EditWarningTest extends UnitTestCase {
      * - There are locks of other articles an sections by the user.
      */
     public function testArticleEditing_SectionConflictCase3() {
-        $connection = &new MockDatabaseConnection();
-        $request = "ARTICLE_LOCKS";
-        $argument = array( "editwarning_locks", "*", "`article_id` = '1'" );
-        $values = array(
+        $this->_values = array(
           array(
             'id'         => 1,
             'user_id'    => 4,
@@ -614,13 +537,9 @@ class EditWarningTest extends UnitTestCase {
             'section'    => 1
           )
         );
+        $this->setDBvalues();
 
-        $connection->setReturnValue( 'select', $request, $argument );
-        $connection->setReturnReferenceAt( 0, 'fetchRow', $values[0], $request );
-        $connection->setReturnReferenceAt( 1, 'fetchRow', $values[1], $request );
-        $connection->setReturnReferenceAt( 2, 'fetchRow', $values[2], $request );
-
-        $this->p->load( $connection, 1 );
+        $this->p->load( $this->_connection, 1 );
         $this->assertTrue( $this->p->anyLock() );
         $this->assertFalse( $this->p->articleLock() );
         $this->assertFalse( $this->p->articleUserLock() );
@@ -637,10 +556,7 @@ class EditWarningTest extends UnitTestCase {
      * - There's only a section lock by the user.
      */
     public function testSectionEditing_HimselfCase1() {
-        $connection = &new MockDatabaseConnection();
-        $request = "ARTICLE_LOCKS";
-        $argument = array( "editwarning_locks", "*", "`article_id` = '1'" );
-        $values = array(
+        $this->_values = array(
           array(
             'id'         => 1,
             'user_id'    => 3,
@@ -649,11 +565,9 @@ class EditWarningTest extends UnitTestCase {
             'section'    => 1
           )
         );
+        $this->setDBvalues();
 
-        $connection->setReturnValue( 'select', $request, $argument );
-        $connection->setReturnReferenceAt( 0, 'fetchRow', $values[0], $request );
-
-        $this->p->load( $connection, 1 );
+        $this->p->load( $this->_connection, 1 );
         $this->assertTrue( $this->p->anyLock() );
         $this->assertFalse( $this->p->articleLock() );
         $this->assertFalse( $this->p->articleUserLock() );
@@ -669,10 +583,7 @@ class EditWarningTest extends UnitTestCase {
      * - There are locks of other articles and sections by other users.
      */
     public function testSectionEditing_HimselfCase2() {
-        $connection = &new MockDatabaseConnection();
-        $request = "ARTICLE_LOCKS";
-        $argument = array( "editwarning_locks", "*", "`article_id` = '1'" );
-        $values = array(
+        $this->_values = array(
           array(
             'id'         => 1,
             'user_id'    => 3,
@@ -695,13 +606,9 @@ class EditWarningTest extends UnitTestCase {
             'section'    => 1
           )
         );
+        $this->setDBvalues();
 
-        $connection->setReturnValue( 'select', $request, $argument );
-        $connection->setReturnReferenceAt( 0, 'fetchRow', $values[0], $request );
-        $connection->setReturnReferenceAt( 1, 'fetchRow', $values[1], $request );
-        $connection->setReturnReferenceAt( 2, 'fetchRow', $values[2], $request );
-
-        $this->p->load( $connection, 1 );
+        $this->p->load( $this->_connection, 1 );
         $this->assertTrue( $this->p->anyLock() );
         $this->assertFalse( $this->p->articleLock() );
         $this->assertFalse( $this->p->articleUserLock() );
@@ -717,10 +624,7 @@ class EditWarningTest extends UnitTestCase {
      * - There are locks of other articles and sections by the user.
      */
     public function testSectionEditing_HimselfCase3() {
-        $connection = &new MockDatabaseConnection();
-        $request = "ARTICLE_LOCKS";
-        $argument = array( "editwarning_locks", "*", "`article_id` = '1'" );
-        $values = array(
+        $this->_values = array(
           array(
             'id'         => 1,
             'user_id'    => 3,
@@ -743,13 +647,9 @@ class EditWarningTest extends UnitTestCase {
             'section'    => 1
           )
         );
+        $this->setDBvalues();
 
-        $connection->setReturnValue( 'select', $request, $argument );
-        $connection->setReturnReferenceAt( 0, 'fetchRow', $values[0], $request );
-        $connection->setReturnReferenceAt( 1, 'fetchRow', $values[1], $request );
-        $connection->setReturnReferenceAt( 2, 'fetchRow', $values[2], $request );
-
-        $this->p->load( $connection, 1 );
+        $this->p->load( $this->_connection, 1 );
         $this->assertTrue( $this->p->anyLock() );
         $this->assertFalse( $this->p->articleLock() );
         $this->assertFalse( $this->p->articleUserLock() );
@@ -766,10 +666,7 @@ class EditWarningTest extends UnitTestCase {
      * - There's only a section lock by someone else.
      */
     public function testSectionEditing_SectionConflictCase1() {
-        $connection = &new MockDatabaseConnection();
-        $request = "ARTICLE_LOCKS";
-        $argument = array( "editwarning_locks", "*", "`article_id` = '1'" );
-        $values = array(
+        $this->_values = array(
           array(
             'id'         => 1,
             'user_id'    => 4,
@@ -778,11 +675,9 @@ class EditWarningTest extends UnitTestCase {
             'section'    => 1
           )
         );
+        $this->setDBvalues();
 
-        $connection->setReturnValue( 'select', $request, $argument );
-        $connection->setReturnReferenceAt( 0, 'fetchRow', $values[0], $request );
-
-        $this->p->load( $connection, 1 );
+        $this->p->load( $this->_connection, 1 );
         $this->assertTrue( $this->p->anyLock() );
         $this->assertFalse( $this->p->articleLock() );
         $this->assertFalse( $this->p->articleUserLock() );
@@ -798,10 +693,7 @@ class EditWarningTest extends UnitTestCase {
      * - There are locks of other articles and sections by other users.
      */
     public function testSectionEditing_SectionConflictCase2() {
-        $connection = &new MockDatabaseConnection();
-        $request = "ARTICLE_LOCKS";
-        $argument = array( "editwarning_locks", "*", "`article_id` = '1'" );
-        $values = array(
+        $this->_values = array(
           array(
             'id'         => 1,
             'user_id'    => 4,
@@ -824,13 +716,9 @@ class EditWarningTest extends UnitTestCase {
             'section'    => 1
           )
         );
+        $this->setDBvalues();
 
-        $connection->setReturnValue( 'select', $request, $argument );
-        $connection->setReturnReferenceAt( 0, 'fetchRow', $values[0], $request );
-        $connection->setReturnReferenceAt( 1, 'fetchRow', $values[1], $request );
-        $connection->setReturnReferenceAt( 2, 'fetchRow', $values[2], $request );
-
-        $this->p->load( $connection, 1 );
+        $this->p->load( $this->_connection, 1 );
         $this->assertTrue( $this->p->anyLock() );
         $this->assertFalse( $this->p->articleLock() );
         $this->assertFalse( $this->p->articleUserLock() );
@@ -846,10 +734,7 @@ class EditWarningTest extends UnitTestCase {
      * - There are locks of other articles ans sections by the user.
      */
     public function testSectionEditing_SectionConflictCase3() {
-        $connection = &new MockDatabaseConnection();
-        $request = "ARTICLE_LOCKS";
-        $argument = array( "editwarning_locks", "*", "`article_id` = '1'" );
-        $values = array(
+        $this->_values = array(
           array(
             'id'         => 1,
             'user_id'    => 4,
@@ -872,13 +757,9 @@ class EditWarningTest extends UnitTestCase {
             'section'    => 1
           )
         );
+        $this->setDBvalues();
 
-        $connection->setReturnValue( 'select', $request, $argument );
-        $connection->setReturnReferenceAt( 0, 'fetchRow', $values[0], $request );
-        $connection->setReturnReferenceAt( 1, 'fetchRow', $values[1], $request );
-        $connection->setReturnReferenceAt( 2, 'fetchRow', $values[2], $request );
-
-        $this->p->load( $connection, 1 );
+        $this->p->load( $this->_connection, 1 );
         $this->assertTrue( $this->p->anyLock() );
         $this->assertFalse( $this->p->articleLock() );
         $this->assertFalse( $this->p->articleUserLock() );
