@@ -87,7 +87,7 @@ class EditWarning {
     public function articleUserLock() {
         $lock_objects = $this->getLocks();
         foreach( $lock_objects as $lock ) {
-            if( $lock->getSection() == 0 && $lock->getUserID == $this->getUserID() ) {
+            if( $lock->getSection() == 0 && $lock->getUserID() == $this->getUserID() ) {
                 return $lock;
             }
         }
@@ -122,7 +122,7 @@ class EditWarning {
         $this->_article_locks[] = new EditWarning_Lock( $parent, $db_row );
     }
 
-    public function addLock( $dbw, $user_id, $user_name, $section ) {
+    public function saveLock( $dbw, $user_id, $user_name, $section ) {
     	$values = array(
     	  'user_id'    => $user_id,
     	  'user_name'  => $user_name,
