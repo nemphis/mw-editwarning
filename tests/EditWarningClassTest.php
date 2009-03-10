@@ -6,7 +6,7 @@ require_once("Mock_DatabaseConnection.php");
 
 Mock::generate('DatabaseConnection');
 
-class EditWarning_FunctionalTests extends UnitTestCase {
+class EditWarning_ClassTests extends UnitTestCase {
 
     private $_p;
     private $_connection;
