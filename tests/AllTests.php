@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Mock for MediaWiki database connection class.
+ * SimpleTest testgroup: All tests.
  * 
  * This file is part of the MediaWiki extension EditWarning. It contains
- * the interface for the mediawiki database class for mocking purposes.
+ * all SimpleTest unit tests.
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,9 +26,12 @@
  * @category	Extensions
  * @package		EditWarning
  */
+ 
+require_once( "simpletest/autorun.php" );
 
-class DatabaseConnection {
-    public function select() {}
-    public function fetchRow() {}
-    public function free() {}
-}
+$suite = &new TestSuite( "All EditWarning Tests" );
+$suite->addTestFile( "EditWarningClassTest.php" );
+$suite->addTestFile( "EditWarningHookTest.php" );
+$suite->run(new HtmlReporter());
+
+?>

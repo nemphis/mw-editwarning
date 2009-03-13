@@ -28,7 +28,7 @@
  * @package		EditWarning
  */
 
-if (!defined('MEDIAWIKI')) {
+/*if (!defined('MEDIAWIKI')) {
     echo <<<EOT
 To install this extension, put the following line in LocalSettings.php:
 require_once "\$IP/extensions/EditWarning/EditWarning.php";
@@ -36,7 +36,7 @@ require_once "\$IP/extensions/EditWarning/EditWarning.php";
 See http://www.mediawiki.org/wiki/Extension:EditWarning for more information.
 EOT;
     exit(1);
-}
+}*/
 
 $extension_dir = dirname(__FILE__) . "/";
 

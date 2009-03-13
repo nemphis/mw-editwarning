@@ -71,18 +71,14 @@ class EditWarning {
      * @param int $article_id ID of the current article (optional).
      * @param int $section ID of the current section (optional).
      */
-    public function __construct( $user_id, $article_id = null, $section = null ) {
-        $this->setUserID( $user_id );
-        $this->setArticleID( $article_id );
-        $this->setSection( $section );
-    }
+    public function __construct( $user_id, $article_id = null, $section = null ) {}
 
     /**
      * Recieves data from database sets object values and creates
      * lock objects.
      * 
      * @access public
-     * @param object $dbr
+     * @param object $dbr Database connection object.
      */
     public function load( $dbr ) {
     	// Build conditions for select operation.
@@ -126,7 +122,7 @@ class EditWarning {
 
     /**
      * @access public
-     * @return int ID of the current user.
+     * @return int Id of the current user.
      */
     public function getUserID() {
         return $this->_user_id;
@@ -134,7 +130,7 @@ class EditWarning {
 
     /**
      * @access public
-     * @param int $user_id ID of the current user.
+     * @param int $user_id Id of the current user.
      */
     public function setUserID( $user_id ) {
         $this->_user_id = $user_id;
@@ -142,7 +138,7 @@ class EditWarning {
 
     /**
      * @access public
-     * @return int ID of the current article.
+     * @return int Id of the current article.
      */
     public function getArticleID() {
         return $this->_article_id;
@@ -150,7 +146,7 @@ class EditWarning {
 
     /**
      * @access public
-     * @param int $article_id ID of the current article.
+     * @param int $article_id Id of the current article.
      */
     public function setArticleID( $article_id ) {
         $this->_article_id = $article_id;
@@ -158,7 +154,7 @@ class EditWarning {
 
     /**
      * @access public
-     * @return int ID of the current section.
+     * @return int Id of the current section.
      */
     public function getSection() {
         return $this->_section;
@@ -166,7 +162,7 @@ class EditWarning {
     
     /**
      * @access public
-     * @param int $section ID of the current section.
+     * @param int $section Id of the current section.
      */
     public function setSection( $section ) {
         $this->_section = $section;
@@ -276,9 +272,9 @@ class EditWarning {
      * 
      * @access public
      * @param object $dbw MediaWiki write connection object.
-     * @param int $user_id ID of the current user.
+     * @param int $user_id Id of the current user.
      * @param string $user_name Name of the current user.
-     * @param int $section ID of the current section (0 for no section).
+     * @param int $section Id of the current section (0 for no section).
      */
     public function saveLock( $dbw, $user_id, $user_name, $section ) {
     	$values = array(
@@ -297,9 +293,9 @@ class EditWarning {
      * @access public
      * @see getTimestamp()
      * @param object $dbw MediaWiki write connection object.
-     * @param int $user_id ID of the current user.
+     * @param int $user_id Id of the current user.
      * @param string $user_name Name of the current user.
-     * @param int $section ID of the current section (0 for no section).
+     * @param int $section Id of the current section (0 for no section).
      */
     public function updateLock( $dbw, $user_id, $user_name, $section ) {
         $value      = array( "timestamp" => $this->getTimestamp( TIMESTAMP_NEW ) );
@@ -316,9 +312,9 @@ class EditWarning {
      * 
      * @access public
      * @param object $dbw MediaWiki write connection object.
-     * @param int $user_id ID of the current user.
+     * @param int $user_id Id of the current user.
      * @param string $user_name Name of the current user.
-     * @param int $section ID of the current section (0 for no section).
+     * @param int $section Id of the current section (0 for no section).
      */
     public function removeLock( $dbw, $user_id, $user_name, $section ) {
         $conditions = array(
@@ -349,7 +345,7 @@ class EditWarning_Lock {
 	
 	/**
 	 * @access private
-	 * @var int Contains the ID of the user of the lock.
+	 * @var int Contains the Id of the user of the lock.
 	 */
     private $_user_id;
     
@@ -361,7 +357,7 @@ class EditWarning_Lock {
     
     /**
      * @access private
-     * @var int Contains the ID of the section of the lock.
+     * @var int Contains the Id of the section of the lock.
      */
     private $_section = 0;
     
@@ -397,7 +393,7 @@ class EditWarning_Lock {
 
     /**
      * @access public
-     * @return int ID of the user of the lock.
+     * @return int Id of the user of the lock.
      */
     public function getUserID() {
         return $this->_user_id;
@@ -405,7 +401,7 @@ class EditWarning_Lock {
 
     /**
      * @access public
-     * @param int $user_id ID of the user of the lock.
+     * @param int $user_id Id of the user of the lock.
      */
     public function setUserID( $user_id ) {
         $this->_user_id = $user_id;
@@ -429,7 +425,7 @@ class EditWarning_Lock {
 
     /**
      * @access public
-     * @return int ID of the section of the lock.
+     * @return int Id of the section of the lock.
      */
     public function getSection() {
         return $this->_section;
@@ -437,7 +433,7 @@ class EditWarning_Lock {
 
     /**
      * @access public
-     * @param int $section ID of the section of the lock.
+     * @param int $section Id of the section of the lock.
      */
     public function setSection( $section ) {
         $this->_section = $section;

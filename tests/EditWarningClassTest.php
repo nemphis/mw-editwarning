@@ -1,10 +1,37 @@
 <?php
 
-require_once("simpletest/autorun.php");
-require_once("../EditWarning.class.php");
-require_once("Mock_DatabaseConnection.php");
+/**
+ * Test cases for EditWarning class functions.
+ * 
+ * This file is part of the MediaWiki extension EditWarning. It contains
+ * test cases for the EditWarning class functions.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ * @author		Thomas David <ThomasDavid@gmx.de>
+ * @copyright	2007-2009 Thomas David <ThomasDavid@gmx.de>
+ * @license		http://www.gnu.org/licenses/gpl-howto.html GNU AGPL 3.0 or later
+ * @version		0.4-prealpha
+ * @category	Extensions
+ * @package		EditWarning
+ */
 
-Mock::generate('DatabaseConnection');
+require_once( "simpletest/autorun.php" );
+require_once( "../EditWarning.class.php" );
+require_once( "Mock_DatabaseConnection.php" );
+
+Mock::generate( "DatabaseConnection" );
 
 class EditWarning_ClassTests extends UnitTestCase {
 
@@ -21,7 +48,9 @@ class EditWarning_ClassTests extends UnitTestCase {
         }
     }
 
-    public function __construct() {}
+    public function __construct() {
+    	$this->UnitTestCase( "EditWarning Class Test" );
+    }
 
     public function setUp() {
         $this->_p           = new EditWarning( 3, 1 );
@@ -59,7 +88,7 @@ class EditWarning_ClassTests extends UnitTestCase {
      * by himself.
      *
      * Assumptions:
-     * - There's only an article lock by the user.
+     * - There's an article lock by the user.
      */
     public function testArticleEditing_HimselfCase() {
         $this->_values = array(
@@ -87,7 +116,7 @@ class EditWarning_ClassTests extends UnitTestCase {
      * already working on it.
      *
      * Assumptions:
-     * - There's only an article lock by someone else.
+     * - There's an article lock by someone else.
      */
     public function testArticleEditing_ArticleConflictCase() {
         $this->_values = array(
@@ -144,7 +173,7 @@ class EditWarning_ClassTests extends UnitTestCase {
      * already locked by himself.
      *
      * Assumptions:
-     * - There's only a section lock by the user.
+     * - There's a section lock by the user.
      */
     public function testSectionEditing_HimselfCase() {
         $this->_values = array(
