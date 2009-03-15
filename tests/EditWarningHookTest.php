@@ -26,16 +26,22 @@
  * @category	Extensions
  * @package		EditWarning
  */
+ 
+if ( !defined( 'EDITWARNING_UNITTEST' ) ) {
+	define( 'EDITWARNING_UNITTEST', true );
+}
 
 /**
  * Constants for return values of hook functions.
  */
-define( "EDIT_ARTICLE_NEW",     1);
-define( "EDIT_ARTICLE_USER",    2);
-define( "EDIT_ARTICLE_OTHER",   3);
-define( "EDIT_ARTICLE_SECTION", 4);
-define( "EDIT_SECTION_USER",    5);
-define( "EDIT_SECTION_OTHER",   6);
+define( 'EDIT_ARTICLE_NEW',     1);
+define( 'EDIT_ARTICLE_USER',    2);
+define( 'EDIT_ARTICLE_OTHER',   3);
+define( 'EDIT_ARTICLE_SECTION', 4);
+define( 'EDIT_SECTION_NEW',     5);
+define( 'EDIT_SECTION_USER',    6);
+define( 'EDIT_SECTION_OTHER',   7);
+define( 'EDIT_SECTION_ARTICLE', 8);
 
 require_once( "simpletest/autorun.php" );
 require_once( "../EditWarning.php" );

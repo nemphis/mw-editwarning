@@ -27,6 +27,10 @@
  * @package		EditWarning
  */
 
+if ( !defined( 'EDITWARNING_UNITTEST' ) ) {
+	define( 'EDITWARNING_UNITTEST', true );
+}
+
 require_once( "simpletest/autorun.php" );
 require_once( "../EditWarning.class.php" );
 require_once( "Mock_DatabaseConnection.php" );

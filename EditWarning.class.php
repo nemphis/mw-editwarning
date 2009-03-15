@@ -71,7 +71,11 @@ class EditWarning {
      * @param int $article_id ID of the current article (optional).
      * @param int $section ID of the current section (optional).
      */
-    public function __construct( $user_id, $article_id = null, $section = null ) {}
+    public function __construct( $user_id, $article_id = null, $section = null ) {
+    	this->setUserID( $user_id );
+    	this->setArticleID( $article_id );
+    	this->setSection( $section );
+    }
 
     /**
      * Recieves data from database sets object values and creates
@@ -186,8 +190,7 @@ class EditWarning {
      * Checks if there is a lock for the whole article.
      * 
      * @access public
-     * @return bool Returns true if there is an lock for the whole
-     *              article, else false.
+     * @return object|bool Returns the EditWarning_Lock object or false.
      */
     public function articleLock() {
         $lock_objects = $this->getLocks();
@@ -203,7 +206,7 @@ class EditWarning {
      * Checks if there is a lock for the whole article by the current user.
      * 
      * @access public
-     * @return mixed|bool Returns an array with EditWarning_Lock objects or false.
+     * @return object|bool Returns the EditWarning_Lock object or false.
      */
     public function articleUserLock() {
         $lock_objects = $this->getLocks();
@@ -276,7 +279,7 @@ class EditWarning {
      * @param string $user_name Name of the current user.
      * @param int $section Id of the current section (0 for no section).
      */
-    public function saveLock( $dbw, $user_id, $user_name, $section ) {
+    public function saveLock( $dbw, $user_id, $user_name, $section = 0 ) {
     	$values = array(
     	  'user_id'    => $user_id,
     	  'user_name'  => $user_name,
@@ -297,7 +300,7 @@ class EditWarning {
      * @param string $user_name Name of the current user.
      * @param int $section Id of the current section (0 for no section).
      */
-    public function updateLock( $dbw, $user_id, $user_name, $section ) {
+    public function updateLock( $dbw, $user_id, $user_name, $section = 0 ) {
         $value      = array( "timestamp" => $this->getTimestamp( TIMESTAMP_NEW ) );
         $conditions = array(
           'user_id'    => $user_id,
@@ -316,11 +319,10 @@ class EditWarning {
      * @param string $user_name Name of the current user.
      * @param int $section Id of the current section (0 for no section).
      */
-    public function removeLock( $dbw, $user_id, $user_name, $section ) {
+    public function removeLock( $dbw, $user_id, $user_name ) {
         $conditions = array(
           'user_id'    => $user_id,
-          'article_id' => $this->getArticleID(),
-          'section'    => $section
+          'article_id' => $this->getArticleID()
         );
         $dbw->delete( "editwarning_locks", $conditions );
     }
