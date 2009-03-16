@@ -109,7 +109,7 @@ class EditWarning_ClassTests extends UnitTestCase {
         $this->_p->load( $this->_connection );
         $this->assertTrue( $this->_p->anyLock() );
         $this->assertTrue( $this->_p->articleLock() );
-        $this->assertIsA( $this->_p->articleUserLock(), "EditWarning_Lock" );
+        $this->assertIsA( $this->_p->articleUserLock(), "EditWarningLock" );
         $this->assertFalse( $this->_p->sectionLock() );
         $this->assertFalse( $this->_p->sectionUserLock() );
     }

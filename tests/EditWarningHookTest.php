@@ -47,9 +47,11 @@ require_once( "simpletest/autorun.php" );
 require_once( "../EditWarning.php" );
 require_once( "../EditWarning.class.php" );
 require_once( "../../mw/includes/EditPage.php" );
+require_once( "../../mw/includes/Article.php" );
 
 Mock::generate( "EditWarning" );
 Mock::generate( "EditPage" );
+Mock::generate( "Article" );
 
 class EditWarningHookTests extends UnitTestCase {
 	/**
@@ -71,6 +73,7 @@ class EditWarningHookTests extends UnitTestCase {
 	public function setUp() {
 		$this->_ew = &new MockEditWarning();
 		$this->_ep = &new MockEditPage();
+		$this->_ep->mArticle = &new MockArticle(); 
 	}
 	
 	public function tearDown() {
