@@ -3,9 +3,9 @@
 ================================================
 
 Author: Thomas David (ThomasDavid@gmx.de)
-Version: 0.3.1
-Date: 2008-05-09
-Licence: GNU AGPL 3.0 or later
+Version: 0.3.4
+Date: 2009-04-02
+Licence: GNU GPL 2.0 or later
 
 If the user opens a page for editing which is being edited by another user
 at the same time this extension displays a warning on the editing page.
@@ -13,9 +13,10 @@ at the same time this extension displays a warning on the editing page.
 Notice: It's not recommend to use this extension if anonymous users
 are allowed to edit pages, because it ignores anonymous page edits.
 
-Notice: It's strongly recommened to upgrade to 0.3.1, if you use an older
-of this extension.
- 
+Notice: It's strongly recommened to upgrade to 0.3.2, if you use a version
+older than 0.3.1. These versions may have problems with newer MediaWiki
+releases.
+
 ===== Installation =====
 
 1.) Move the folder "EditWarning" to the "extensions" folder of your
@@ -50,6 +51,11 @@ require_once("$IP/extensions/EditWarning/EditWarning.php");
               (Note: The value is the number of minutes):
 
 $EditWarning_Timeout = 5;
+
+Optional: The extension hides everything except the editor area. If you don't
+like this behavior, add this line to your LocalSettings.php:
+
+$EditWarning_OnlyEditor = "false";
 
 ===== Update =====
 

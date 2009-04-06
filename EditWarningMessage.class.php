@@ -7,11 +7,11 @@
  * the implementation of EditWarningMessage class responsible for loading
  * the templates, inserting values and outputting the HTML code.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -22,7 +22,7 @@
  * 
  * @author		Thomas David <ThomasDavid@gmx.de>
  * @copyright	2007-2009 Thomas David <ThomasDavid@gmx.de>
- * @license		http://www.gnu.org/licenses/gpl-howto.html GNU AGPL 3.0 or later
+ * @license		http://www.gnu.org/licenses/gpl-2.0.html GNU GPL 2.0 or later
  * @version		0.4-prealpha
  * @category	Extensions
  * @package		EditWarning
@@ -114,7 +114,7 @@ class EditWarningMessage {
      * @return array Array of values used in message strings.
      */
     public function getValues() {
-    	return $this->values();
+    	return $this->values;
     }
     
     /**
@@ -155,7 +155,7 @@ class EditWarningMessage {
      * @access public
      */
     public function processTemplate() {
-    	if ( $this->getContent == null ) {
+    	if ( $this->getContent() == null ) {
     		throw new NoTemplateContentFoundException(
     		    "No template content found. You should load a template first."
     		);
@@ -164,7 +164,7 @@ class EditWarningMessage {
     	foreach( $this->getLabels() as $label => $value ) {
     		$this->setContent( preg_replace(
                 "/{{{" . $label . "}}}/",
-                wfMsg( $value, implode( ",", $this->getValues() ) ),
+                wfMsg( $value, $this->getValues() ),
                 $this->getContent()
             ) );
     	}
@@ -178,7 +178,7 @@ class EditWarningMessage {
     public function show() {
     	global $IP, $wgOut;
     	
-    	$this->loadTemplate( $IP . "extensions/EditWarning/templates/" . $this->getMsgType() . ".html" );
+    	$this->loadTemplate( $IP . "/extensions/EditWarning/templates/" . $this->getMsgType() . ".html" );
     	$this->processTemplate();
     	$wgOut->addHtml( $this->getContent() );
     }

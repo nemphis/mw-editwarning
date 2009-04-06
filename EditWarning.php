@@ -7,11 +7,11 @@
  * the implementation of EditWarning and EditWarning_Lock class with
  * functions to add, edit, delete and check for article locks.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -22,7 +22,7 @@
  * 
  * @author		Thomas David <ThomasDavid@gmx.de>
  * @copyright	2007-2009 Thomas David <ThomasDavid@gmx.de>
- * @license		http://www.gnu.org/licenses/gpl-howto.html GNU AGPL 3.0 or later
+ * @license		http://www.gnu.org/licenses/gpl-2.0.html GNU GPL 2.0 or later
  * @version		0.4-prealpha
  * @category	Extensions
  * @package		EditWarning
@@ -53,14 +53,14 @@ $wgExtensionMessagesFiles['EditWarning'] = $extension_dir . 'Messages.i18n.php';
 $wgExtensionFunctions[]                  = 'fnEditWarning_init';
 
 if ( !defined( 'EDITWARNING_UNITTEST' ) ) {
-	$editwarning = new EditWarning( $wgUser->getID() );
+	$editwarning = new EditWarning();
 }
 
 // Assign hooks to functions
 $wgHooks['AlternateEdit'][]     = array( 'fnEditWarning_edit', $editwarning );   // On article edit.
 $wgHooks['ArticleSave'][]       = array( 'fnEditWarning_remove', $editwarning ); // On article save.
 $wgHooks['UserLogout'][]        = array( 'fnEditWarning_logout', $editwarning ); // On user logout.
-$wgHooks['ArticleViewHeader'][] = array( 'fnEditWarning_remove', $editwarning ); // On editing abort.
+$wgHooks['ArticleViewHeader'][] = array( 'fnEditWarning_abort', $editwarning ); // On editing abort.
 
 /**
  * Setup EditWarning extension
@@ -68,10 +68,10 @@ $wgHooks['ArticleViewHeader'][] = array( 'fnEditWarning_remove', $editwarning );
  * @return boolean Returns always true.
  */
 function fnEditWarning_init() {
-    global $wgRequest, $wgOut;
+    global $wgRequest, $wgOut, $EditWarning_OnlyEditor;
 
     // Add CSS styles to header
-    if ($wgRequest->getVal('action') == 'edit' || $wgRequest->getVal('action') == 'submit') {
+    if ( ( $wgRequest->getVal('action') == 'edit' || $wgRequest->getVal('action') == 'submit' ) && $EditWarning_OnlyEditor != "false" ) {
       $wgOut->addHeadItem('edit_css', '  <link href="extensions/EditWarning/article_edit.css" rel="stylesheet" type="text/css" />');
     }
     $wgOut->addHeadItem('EditWarning', '  <link href="extensions/EditWarning/style.css" rel="stylesheet" type="text/css" />');
@@ -92,13 +92,14 @@ function fnEditWarning_init() {
  *                     environment, else true.
  */
 function fnEditWarning_edit(&$ew, &$editpage) {
-	global $wgRequest, $wgUser;
+	global $wgRequest, $wgUser, $wgScriptPath, $wgScriptExtension;
 	
 	// Abort on nonexisting pages or anonymous users.
 	if ( $editpage->mArticle->getID() < 1 || $wgUser->getID() < 1 ) {
 		return true;
 	}
-	
+
+	$ew->setUserID( $wgUser->getID() );
 	$ew->setArticleID( $editpage->mArticle->getID() );
 	$section    = (int) $wgRequest->getVal( 'section' );
 	$dbr        =& wfGetDB( DB_SLAVE );
@@ -111,7 +112,7 @@ function fnEditWarning_edit(&$ew, &$editpage) {
         $article_title = $editpage->mArticle->mTitle->getNsText() . ":" . $editpage->mArticle->mTitle->getPartialURL();
     }
     
-    $url = $PHP_SELF . "?title=" . $article_title;
+    $url = $wgScriptPath . "index" . $wgScriptExtension . "?title=" . $article_title;
 	
 	// Check request values
 	if ( $section > 0 ) {
@@ -191,8 +192,8 @@ function fnEditWarning_edit(&$ew, &$editpage) {
 				$msg->setLabel( 'URL', $url );
 				$msg->setLabel( 'BUTTON_CANCEL', 'ew-button-cancel' );
 				$msg->addValue( $lock->getUserName() );
-				$msg->addValue( date( "Y-m-d", $ew->getTimestamp() ) );
-				$msg->addValue( date( "H:i", $ew->getTimestamp() ) );
+				$msg->addValue( date( "Y-m-d", $lock->getTimestamp() ) );
+				$msg->addValue( date( "H:i", $lock->getTimestamp() ) );
 				$msg->addValue( $time_to_wait );
 				
 				// Use minutes or seconds string?
@@ -338,8 +339,8 @@ function fnEditWarning_edit(&$ew, &$editpage) {
 			$msg->setLabel( 'MSG', 'ew-notice-article' );
 			$msg->setLabel( 'URL', $url );
 			$msg->setLabel( 'BUTTON_CANCEL', 'ew-button-cancel' );
-			$msg->addValue( date( "Y-m-d", $ew->getTimestamp() ) );
-			$msg->addValue( date( "H:i", $ew->getTimestamp() ) );
+			$msg->addValue( date( "Y-m-d", $ew->getTimestamp( TIMESTAMP_NEW ) ) );
+			$msg->addValue( date( "H:i", $ew->getTimestamp( TIMESTAMP_NEW ) ) );
 			$msg->addValue( wfMsg( 'ew-leave' ) );
 			$msg->show();
 			unset( $ew );
@@ -355,21 +356,44 @@ function fnEditWarning_edit(&$ew, &$editpage) {
 }
 
 /**
- * Action if article is saved or editing is aborted.
+ * Action if article is saved.
  *
  * @hook ArticleSave
  * @param
  * @return boolean Returns always true.
  */
-function fnEditWarning_remove(&$ew, &$article, &$user, &$text, &$summary, $minor, $watch, $sectionanchor, &$flags) {
+function fnEditWarning_remove( &$ew, &$article, &$user, &$text, &$summary, $minor, $watch, $sectionanchor, &$flags ) {
+	global $wgUser;
+	
 	// Abort on nonexisting pages or anonymous users.
 	if ( $article->getID() < 1 || $user->getID() < 1 ) {
 		return true;
 	}
 	
 	$dbw =& wfGetDB( DB_MASTER );
+	$ew->setUserID( $wgUser->getID() );
 	$ew->setArticleID( $article->getID() );
 	$ew->removeLock( $dbw, $user->getID(), $user->getName() );
+	
+	return true;
+}
+
+/**
+ * Action if editing is aborted.
+ * 
+ * @hook ArticleViewHeader
+ * @param
+ * @return boolean Returns always true.
+ */
+function fnEditWarning_abort( $ew, &$article, &$outputDone, &$pcache ) {
+	global $wgRequest, $wgUser;
+	
+	if( $wgRequest->getVal( 'cancel' ) == "true" ) {
+		$dbw =& wfGetDB( DB_MASTER );
+		$ew->setArticleID( $article->getID() );
+		$ew->removeLock( $dbw, $wgUser->getID(), $wgUser->getName() );
+	}
+	
 	return true;
 }
 
