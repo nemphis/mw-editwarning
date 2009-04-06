@@ -30,8 +30,8 @@
 
 if ( !defined( 'MEDIAWIKI' ) && !defined( 'EDITWARNING_UNITTEST' ) ) {
     echo <<<EOT
-To install this extension, put the following line in LocalSettings.php:
-require_once "\$IP/extensions/EditWarning/EditWarning.php";
+To install this extension, put the following line in LocalSettings.php:\n
+require_once "\$IP/extensions/EditWarning/EditWarning.php";\n\n
 
 See http://www.mediawiki.org/wiki/Extension:EditWarning for more information.
 EOT;
@@ -39,6 +39,8 @@ EOT;
 }
 
 $extension_dir = dirname(__FILE__) . "/";
+
+require_once $extension_dir . 'EditWarningMessage.class.php';
 
 $wgExtensionCredits['EditWarning'][] = array(
     'name'        => "EditWarning",
@@ -48,7 +50,6 @@ $wgExtensionCredits['EditWarning'][] = array(
 );
 
 $wgAutoloadClasses['EditWarning']        = $extension_dir . 'EditWarning.class.php';
-$wgAutoloadClasses['EditWarningMessage'] = $extension_dir . 'EditWarningMessage.class.php';
 $wgExtensionMessagesFiles['EditWarning'] = $extension_dir . 'Messages.i18n.php';
 $wgExtensionFunctions[]                  = 'fnEditWarning_init';
 
@@ -104,6 +105,7 @@ function fnEditWarning_edit(&$ew, &$editpage) {
 	$section    = (int) $wgRequest->getVal( 'section' );
 	$dbr        =& wfGetDB( DB_SLAVE );
 	$dbw        =& wfGetDB( DB_MASTER );
+	$msg_params = array();
 	
 	// Get article title for cancel button
     if ($editpage->mArticle->mTitle->getNamespace() == 'NS_MAIN') {
@@ -112,7 +114,7 @@ function fnEditWarning_edit(&$ew, &$editpage) {
         $article_title = $editpage->mArticle->mTitle->getNsText() . ":" . $editpage->mArticle->mTitle->getPartialURL();
     }
     
-    $url = $wgScriptPath . "index" . $wgScriptExtension . "?title=" . $article_title;
+    $url = $wgScriptPath . "/index" . $wgScriptExtension . "?title=" . $article_title;
 	
 	// Check request values
 	if ( $section > 0 ) {
@@ -127,13 +129,9 @@ function fnEditWarning_edit(&$ew, &$editpage) {
 					$ew->updateLock( $dbw, $wgUser->getID(), $wgUser->getName(), $section );
 					
 					// Show info message with updated timestamp.
-					$msg = new EditWarningMessage( 'notice' );
-					$msg->setLabel( 'MSG', 'ew-notice-section' );
-					$msg->setLabel( 'URL', $url );
-					$msg->setLabel( 'BUTTON_CANCEL', 'ew-button-cancel' );
-					$msg->addValue( date( "Y-m-d", $ew->getTimestamp( TIMESTAMP_NEW ) ) );
-					$msg->addValue( date( "H:i", $ew->getTimestamp( TIMESTAMP_NEW ) ) );
-					$msg->addValue( wfMsg( 'ew-leave' ) );
+					$msg_params[] = date( "Y-m-d", $ew->getTimestamp( TIMESTAMP_NEW ) );
+					$msg_params[] = date( "H:i", $ew->getTimestamp( TIMESTAMP_NEW ) );
+					$msg = EWMsg::getInstance( "SectionNotice", $url, $msg_params );
 					$msg->show();
 					unset( $ew );
 					unset( $msg );
@@ -151,23 +149,19 @@ function fnEditWarning_edit(&$ew, &$editpage) {
 					$time_to_wait = bcdiv( $difference, 60, 0 );
 					
 					// Show warning.
-					$msg = new EditWarningMessage( 'warning' );
-					$msg->setLabel( 'MSG', 'ew-warning-section' );
-					$msg->setLabel( 'URL', $url );
-					$msg->setLabel( 'BUTTON_CANCEL', 'ew-button-cancel' );
-					$msg->addValue( $lock->getUserName() );
-					$msg->addValue( date( "Y-m-d", $lock->getTimestamp() ) );
-					$msg->addValue( date( "H:i", $lock->getTimestamp() ) );
-					$msg->addValue( $time_to_wait );
+					$msg_params[] = $lock->getUserName();
+					$msg_params[] = date( "Y-m-d", $lock->getTimestamp() );
+					$msg_params[] = date( "H:i", $lock->getTimestamp() );
+					$msg_params[] = $time_to_wait;
 					
 					// Use minutes or seconds string?
 					if ($time_to_wait > 1 || $difference > 60) {
-						$msg->addValue( wfMsg( 'minutes' ) );
+						$msg_params[] = wfMsg( 'minutes' );
 					} else {
-						$msg->addValue( wfMsg( 'seconds' ) );
+						$msg_params[] = wfMsg( 'seconds' );
 					}
 					
-					$msg->addValue( wfMsg( 'ew-leave' ) );
+					$msg = EWMsg::getInstance( "SectionWarning", $url, $msg_params );
 					$msg->show();
 					unset( $ew );
 					unset( $msg );
@@ -218,16 +212,16 @@ function fnEditWarning_edit(&$ew, &$editpage) {
 			$ew->saveLock( $dbw, $wgUser->getID(), $wgUser->getName(), $section );
 			
 			// Show info message.
-			$msg = new EditWarningMessage( 'notice' );
-			$msg->setLabel( 'MSG', 'ew-notice-section' );
-			$msg->setLabel( 'URL', $url );
-			$msg->setLabel( 'BUTTON_CANCEL', 'ew-button-cancel' );
-			$msg->addValue( date( "Y-m-d", $ew->getTimestamp( TIMESTAMP_NEW ) ) );
-			$msg->addValue( date( "H:i", $ew->getTimestamp( TIMESTAMP_NEW ) ) );
-			$msg->addValue( wfMsg( 'ew-leave' ) );
-			$msg->show();
-			unset( $ew );
-			unset( $msg );
+//			$msg = new EditWarningMessage( 'notice' );
+//			$msg->setLabel( 'MSG', 'ew-notice-section' );
+//			$msg->setLabel( 'URL', $url );
+//			$msg->setLabel( 'BUTTON_CANCEL', 'ew-button-cancel' );
+//			$msg->addValue( date( "Y-m-d", $ew->getTimestamp( TIMESTAMP_NEW ) ) );
+//			$msg->addValue( date( "H:i", $ew->getTimestamp( TIMESTAMP_NEW ) ) );
+//			$msg->addValue( wfMsg( 'ew-leave' ) );
+//			$msg->show();
+//			unset( $ew );
+//			unset( $msg );
 			
 			if ( defined( 'EDITWARNING_UNITTEST' ) ) {
 				return EDIT_SECTION_NEW;
@@ -246,16 +240,16 @@ function fnEditWarning_edit(&$ew, &$editpage) {
 					$ew->updateLock( $dbw, $wgUser->getID(), $wgUser->getName() );
 					
 					// Show info message with updated timestamp.
-					$msg = new EditWarningMessage( 'notice' );
-					$msg->setLabel( 'MSG', 'ew-notice-article');
-					$msg->setLabel( 'URL', $url );
-					$msg->setLabel( 'BUTTON_CANCEL', 'ew-button-cancel' );
-					$msg->addValue( date( "Y-m-d", $ew->getTimestamp( TIMESTAMP_NEW ) ) );
-					$msg->addValue( date( "H:i", $ew->getTimestamp( TIMESTAMP_NEW ) ) );
-					$msg->addValue( wfMsg( 'ew-leave' ) );
-					$msg->show();
-					unset( $ew );
-					unset( $msg );
+//					$msg = new EditWarningMessage( 'notice' );
+//					$msg->setLabel( 'MSG', 'ew-notice-article');
+//					$msg->setLabel( 'URL', $url );
+//					$msg->setLabel( 'BUTTON_CANCEL', 'ew-button-cancel' );
+//					$msg->addValue( date( "Y-m-d", $ew->getTimestamp( TIMESTAMP_NEW ) ) );
+//					$msg->addValue( date( "H:i", $ew->getTimestamp( TIMESTAMP_NEW ) ) );
+//					$msg->addValue( wfMsg( 'ew-leave' ) );
+//					$msg->show();
+//					unset( $ew );
+//					unset( $msg );
 					
 					if ( defined( 'EDITWARNING_UNITTEST' ) ) {
 						return EDIT_ARTICLE_USER;
@@ -269,27 +263,27 @@ function fnEditWarning_edit(&$ew, &$editpage) {
 					$difference   = floatval( abs( time() - $lock->getTimestamp() ) );
 					$time_to_wait = bcdiv( $difference, 60, 0 );
 					
-					// Show warning.
-					$msg = new EditWarningMessage( 'warning' );
-					$msg->setLabel( 'MSG', 'ew-warning-article' );
-					$msg->setLabel( 'URL', $url );
-					$msg->setLabel( 'BUTTON_CANCEL', 'ew-button-cancel' );
-					$msg->addValue( $lock->getUserName() );
-					$msg->addValue( date( "Y-m-d", $lock->getTimestamp() ) );
-					$msg->addValue( date( "H:i", $lock->getTimestamp() ) );
-					$msg->addValue( $time_to_wait );
-					
-					// Use minutes or seconds string?
-					if ($time_to_wait > 1 || $difference > 60) {
-						$msg->addValue( wfMsg( 'minutes' ) );
-					} else {
-						$msg->addValue( wfMsg( 'seconds' ) );
-					}
-					
-					$msg->addValue( 'ew-leave' );
-					$msg->show();
-					unset( $ew );
-					unset( $msg);
+//					// Show warning.
+//					$msg = new EditWarningMessage( 'warning' );
+//					$msg->setLabel( 'MSG', 'ew-warning-article' );
+//					$msg->setLabel( 'URL', $url );
+//					$msg->setLabel( 'BUTTON_CANCEL', 'ew-button-cancel' );
+//					$msg->addValue( $lock->getUserName() );
+//					$msg->addValue( date( "Y-m-d", $lock->getTimestamp() ) );
+//					$msg->addValue( date( "H:i", $lock->getTimestamp() ) );
+//					$msg->addValue( $time_to_wait );
+//					
+//					// Use minutes or seconds string?
+//					if ($time_to_wait > 1 || $difference > 60) {
+//						$msg->addValue( wfMsg( 'minutes' ) );
+//					} else {
+//						$msg->addValue( wfMsg( 'seconds' ) );
+//					}
+//					
+//					$msg->addValue( 'ew-leave' );
+//					$msg->show();
+//					unset( $ew );
+//					unset( $msg);
 					
 					if ( defined( 'EDITWARNING_UNITTEST' ) ) {
 						return EDIT_ARTICLE_OTHER;
@@ -305,24 +299,24 @@ function fnEditWarning_edit(&$ew, &$editpage) {
 				$difference   = floatval( abs( time() - $lock->getTimestamp() ) );
 				$time_to_wait = bcdiv( $difference, 60, 0 );
 				
-				// Show warning.
-				$msg = new EditWarningMessage( 'warning' );
-				$msg->setLabel( 'MSG', 'ew-warning-sectionedit' );
-				$msg->setLabel( 'URL', $url );
-				$msg->setLabel( 'BUTTON_CANCEL' );
-				$msg->addValue( $time_to_wait );
-				
-				// Use minutes or seconds string?
-				if ($time_to_wait > 1 || $difference > 60) {
-					$msg->addValue( wfMsg( 'minutes' ) );
-				} else {
-					$msg->addValue( wfMsg( 'seconds' ) );
-				}
-				
-				$msg->addValue( 'ew-leave' );
-				$msg->show();
-				unset( $ew );
-				unset( $msg );
+//				// Show warning.
+//				$msg = new EditWarningMessage( 'warning' );
+//				$msg->setLabel( 'MSG', 'ew-warning-sectionedit' );
+//				$msg->setLabel( 'URL', $url );
+//				$msg->setLabel( 'BUTTON_CANCEL' );
+//				$msg->addValue( $time_to_wait );
+//				
+//				// Use minutes or seconds string?
+//				if ($time_to_wait > 1 || $difference > 60) {
+//					$msg->addValue( wfMsg( 'minutes' ) );
+//				} else {
+//					$msg->addValue( wfMsg( 'seconds' ) );
+//				}
+//				
+//				$msg->addValue( 'ew-leave' );
+//				$msg->show();
+//				unset( $ew );
+//				unset( $msg );
 				
 				if ( defined( 'EDITWARNING_UNITTEST' ) ) {
 					return EDIT_ARTICLE_SECTION;
@@ -335,13 +329,9 @@ function fnEditWarning_edit(&$ew, &$editpage) {
 			$ew->saveLock( $dbw, $wgUser->getID(), $wgUser->getName() );
 			
 			// Show info message.
-			$msg = new EditWarningMessage( 'notice' );
-			$msg->setLabel( 'MSG', 'ew-notice-article' );
-			$msg->setLabel( 'URL', $url );
-			$msg->setLabel( 'BUTTON_CANCEL', 'ew-button-cancel' );
-			$msg->addValue( date( "Y-m-d", $ew->getTimestamp( TIMESTAMP_NEW ) ) );
-			$msg->addValue( date( "H:i", $ew->getTimestamp( TIMESTAMP_NEW ) ) );
-			$msg->addValue( wfMsg( 'ew-leave' ) );
+			$msg_params[] = date( "Y-m-d", $ew->getTimestamp( TIMESTAMP_NEW ) );
+			$msg_params[] = date( "H:i", $ew->getTimestamp( TIMESTAMP_NEW ) );
+			$msg = EWMsg::getInstance( "ArticleNotice", $url, $msg_params );
 			$msg->show();
 			unset( $ew );
 			unset( $msg );
