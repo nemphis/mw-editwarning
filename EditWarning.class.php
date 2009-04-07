@@ -89,9 +89,6 @@ class EditWarning {
     	// Build conditions for select operation.
     	$conditions  = sprintf( "`article_id` = '%s'", $this->getArticleID() );
     	$conditions .= sprintf( " AND `timestamp` >= '%s'", $this->getTimestamp( TIMESTAMP_EXPIRED ) );
-    	if ( $this->getSection() != null ) {
-    		$conditions .= sprintf( " AND `section` = '%s'", $this->getSection() );
-    	}
         $result = $dbr->select( "editwarning_locks", "*", $conditions );
 
         // Create lock objects for every valid lock.
@@ -112,13 +109,20 @@ class EditWarning {
      */
     public function getTimestamp( $type ) {
     	global $EditWarning_Timeout;
+    	
+    	// Default timeout is 10 minutes.
+    	if ( $EditWarning_Timeout <= 0 || $EditWarning_Timeout == "" || $EditWarning_Timeout == null ) {
+    		$timeout = 10;
+    	} else {
+    		$timeout = $EditWarning_Timeout;
+    	}
 
         switch ( $type ) {
             case TIMESTAMP_NEW:
-              return mktime( date("H"), date("i") + $EditWarning_Timeout, date("s"), date("m"), date("d"), date("Y") );
+              return mktime( date("H"), date("i") + $timeout, date("s"), date("m"), date("d"), date("Y") );
               break;
             case TIMESTAMP_EXPIRED:
-              return mktime( date("H"), date("i") - $EditWarning_Timeout, date("s"), date("m"), date("d"), date("Y") );
+              return mktime( date("H"), date("i") - $timeout, date("s"), date("m"), date("d"), date("Y") );
               break;
             default:
               throw new InvalidTypeArgumentException( "Invalid argument for type. Use TIMESTAMP_NEW or TIMESTAMP_EXPIRED constant.");

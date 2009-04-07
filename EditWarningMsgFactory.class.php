@@ -1,9 +1,11 @@
+<?php
+
 /**
- * Styles for EditWarning extension.
- *
- * This file is part of MediaWiki extension EditWarning.
- * The style definitions are necessary for the warning/info messages.
- *
+ * EditWarningMsgFactory interface
+ * 
+ * This file is part of the MediaWiki extension EditWarning. It contains
+ * the interface for EditWarningMessage subclass factories.
+ * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
@@ -17,26 +19,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * 
- * @author      Thomas David <ThomasDavid@gmx.de>
- * @copyright   2008-2009 Thomas David <ThomasDavid@gmx.de>
+ * @author		Thomas David <ThomasDavid@gmx.de>
+ * @copyright	2007-2009 Thomas David <ThomasDavid@gmx.de>
  * @license		http://www.gnu.org/licenses/gpl-2.0.html GNU GPL 2.0 or later
- * @version     0.4-prealpha
- * @category    Extensions
- * @package     EditWarning
+ * @version		0.4-prealpha
+ * @category	Extensions
+ * @package		EditWarning
  */
 
-.note {
-	text-align: center;
-	background: #ddffdd;
-	padding: .5em;
-	margin: 1em 0 1em 0;
-	border: 2px solid #008000;
-}
-
-.warning {
-	text-align: center;
-	background: #fdd;
-	padding: .5em;
-	margin: 1em 0 1em 0;
-	border: 2px solid #b80000;
+interface EditWarningMsgFactory {
+	public static function getInstance( $type, $url = null, $params = null );
 }

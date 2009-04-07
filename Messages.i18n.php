@@ -61,7 +61,7 @@ $messages['en'] = array(
     'ew-warning-section'     => "User <strong>$1</strong> opened this section for editing on <strong>$2 $3</strong>. " .
                                 "You shouldn't make any changes for the next <strong>$4 $5</strong> to avoid edit conflicts.<br />$6",
     'ew-warning-sectionedit' => "One or more sections of this article are edited currently. " .
-                                "Please edit a specific section or wait $1 $2 for bigger changes of this article, to avoid edit conflicts.<br />$3",
+                                "Please edit a specific section or wait <strong>$1 $2</strong> for bigger changes of this article, to avoid edit conflicts.<br />$3",
     'ew-leave'               => "You can leave this screen by clicking <em>Cancel</em>.",
     'ew-canceled'            => "Canceled editing.",
     'ew-minute'              => "minute",
@@ -102,7 +102,7 @@ $messages['fr'] = array(
     'ew-warning-section'     => "User <strong>$1</strong> opened this section for editing on <strong>$2 $3</strong>. " .
                                 "Vous devriez eviter de faire des modifications jusqu'au <strong>$4 $5</strong>, afin d'eviter des conflits de version.<br />$6",
     'ew-warning-sectionedit' => "One or more sections of this article are edited currently. " .
-                                "Please edit a specific section or wait $1 $2 for bigger changes of this article, to avoid edit conflicts.<br />$3",
+                                "Please edit a specific section or wait <strong>$1 $2</strong> for bigger changes of this article, to avoid edit conflicts.<br />$3",
     'ew-leave'               => "Vous pouvez quitter cette page en cliquant sur le bouton <em>Annuler</em>.",
     'ew-canceled'            => "Modification interrompue.",
     'ew-minute'              => "minute",

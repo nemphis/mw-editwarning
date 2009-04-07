@@ -21,7 +21,7 @@
  * 
  * @author		Thomas David <ThomasDavid@gmx.de>
  * @copyright	2007-2009 Thomas David <ThomasDavid@gmx.de>
- * @license		http://www.gnu.org/licenses/gpl-howto.html GNU AGPL 3.0 or later
+ * @license		http://www.gnu.org/licenses/gpl-2.0.html GNU GPL 2.0 or later
  * @version		0.4-prealpha
  * @category	Extensions
  * @package		EditWarning

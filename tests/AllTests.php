@@ -4,7 +4,7 @@
  * SimpleTest testgroup: All tests.
  * 
  * This file is part of the MediaWiki extension EditWarning. It contains
- * all SimpleTest unit tests.
+ * a SimpleTest testsuite running all EditWarning unit tests.
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  * 
  * @author		Thomas David <ThomasDavid@gmx.de>
  * @copyright	2007-2009 Thomas David <ThomasDavid@gmx.de>
- * @license		http://www.gnu.org/licenses/gpl-howto.html GNU AGPL 3.0 or later
+ * @license		http://www.gnu.org/licenses/gpl-2.0.html GNU GPL 2.0 or later
  * @version		0.4-prealpha
  * @category	Extensions
  * @package		EditWarning
@@ -32,6 +32,11 @@ require_once( "simpletest/autorun.php" );
 $suite = &new TestSuite( "All EditWarning Tests" );
 $suite->addTestFile( "EditWarningClassTest.php" );
 $suite->addTestFile( "EditWarningHookTest.php" );
-$suite->run(new HtmlReporter());
+
+if ( isset( $_SERVER['SERVER_SOFTWARE'] ) ) {
+	$suite->run( new HtmlReporter() );
+} else {
+	$suite->run( new TextReporter() );
+}
 
 ?>
