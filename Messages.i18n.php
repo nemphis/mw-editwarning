@@ -27,7 +27,7 @@
  * @author		Thomas David <ThomasDavid@gmx.de>
  * @copyright	2007-2009 Thomas David <ThomasDavid@gmx.de>
  * @license		http://www.gnu.org/licenses/gpl-2.0.html GNU GPL 2.0 or later
- * @version		0.4-prealpha
+ * @version		0.4-alpha
  * @category	Extensions
  * @package		EditWarning
  */
@@ -91,7 +91,7 @@ $messages['de'] = array(
     'ew-button-cancel'       => "Abbrechen"
 );
 
-// French
+// French (translation by http://www.mediawiki.org/wiki/User:Rmatt)
 $messages['fr'] = array(
     'ew-notice-article'      => "Jusqu'au <strong>$1</strong> a <strong>$2</strong>, les autres utilisateurs auront un message leur indiquant que vous modifiez cette page." .
                                 "Vous pouvez prolonger cette duree en cliquant sur <em>Previsualiser</em>.<br />$3",

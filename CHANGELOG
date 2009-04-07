@@ -2,7 +2,29 @@
  EditWarning CHANGELOG
 ================================================
 
-==== 0.3.1 (2008-05-09) ===
+==== 0.4-alpha (2009-04-07) ====
+ * Cleaned up the whole code, some parts rewritten.
+ * New feature: Section editing is now supported.
+ * New CSS style for messages.
+ * Bugfix: Now there's no info message showing up if you create a new article
+           or if an anonymous user editing an article.
+
+==== 0.3.4 (2009-04-02) ====
+ * New configuration value $EditWarning_OnlyEditor.
+ * Change the license of this extension to GPL v2, because AGPL 3.0 isn't
+   compatible with GPL v2 used by MediaWiki.
+   
+==== 0.3.3 (2009-03-03) ====
+ * Bugfix: Fixing SQL queries to make the extension work with PostgreSQL.
+ * Added french translation by Rmatt.
+ * Using language setting from user profile.
+
+==== 0.3.2 (2008-07-13) ====
+ * Bugfix: Fixed error on rolling back recent changes.
+ * Bugfix: Now the cancel button works as well if you renamed the
+   index.php to something other (like wiki.php).
+
+==== 0.3.1 (2008-05-09) ====
  * Bugfix: User will be correctly redirected to page on editing abort.
  * Bugfix: Abort editing worked only with pages in the NS_MAIN namespace.
  * Some code cleanup
@@ -16,7 +38,7 @@
  * All warnings of a user will be removed on logout.
  * New look for messages.
  * Message strings seperated from templates.
- * Improved messages. 
-  
+ * Improved messages.
+
 ==== 0.1 beta (2007-11-30) ====
  * First release

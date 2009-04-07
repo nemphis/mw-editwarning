@@ -3,35 +3,40 @@
 ================================================
 
 Author: Thomas David (ThomasDavid@gmx.de)
-Version: 0.3.4
-Date: 2009-04-02
+Version: 0.4-alpha
+Date: 2009-04-07
 Licence: GNU GPL 2.0 or later
 
 If the user opens a page for editing which is being edited by another user
 at the same time this extension displays a warning on the editing page.
 
-Notice: It's not recommend to use this extension if anonymous users
+Notice: It's not recommended to use this extension if anonymous users
 are allowed to edit pages, because it ignores anonymous page edits.
 
-Notice: It's strongly recommened to upgrade to 0.3.2, if you use a version
-older than 0.3.1. These versions may have problems with newer MediaWiki
-releases.
+Notice: This is an alpha release. While you're encouraged to test it and
+report bugs and problems, it's not recommended to use it on productive
+MediaWiki installations. It could kill sweet little bunnies, I warned you! :) 
 
 ===== Installation =====
 
 1.) Move the folder "EditWarning" to the "extensions" folder of your
     MediaWiki installation.
 
-2.) Execute the following SQL statement in your MediaWiki database:
+2.) Execute the following SQL statements in your MediaWiki database:
 
-CREATE TABLE `current_edits` (
-  `id` int(10) unsigned NOT NULL auto_increment,
-  `page_id` int(10) unsigned NOT NULL,
-  `user_id` int(10) unsigned NOT NULL,
-  `user_name` varchar(255) character set latin1 collate latin1_bin NOT NULL,
-  `timestamp` int(10) unsigned NOT NULL,
-  PRIMARY KEY  (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+CREATE TABLE IF NOT EXISTS "editwarning_locks" (
+  "user_id" int(10) unsigned NOT NULL,
+  "user_name" varchar(255) NOT NULL,
+  "article_id" int(10) unsigned NOT NULL,
+  "timestamp" int(11) unsigned NOT NULL,
+  "section" int(2) unsigned NOT NULL,
+  KEY "user_id" ("user_id"),
+  KEY "article_id" ("article_id")
+);
+
+ALTER TABLE `editwarning_locks`
+  ADD CONSTRAINT "editwarning_locks_ibfk_1" FOREIGN KEY ("user_id") REFERENCES "user" ("user_id") ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT "editwarning_locks_ibfk_2" FOREIGN KEY ("article_id") REFERENCES "page" ("page_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 3.) Add this line to your LocalSettings.php:
 
@@ -56,7 +61,3 @@ Optional: The extension hides everything except the editor area. If you don't
 like this behavior, add this line to your LocalSettings.php:
 
 $EditWarning_OnlyEditor = "false";
-
-===== Update =====
-
-see UPDATE.

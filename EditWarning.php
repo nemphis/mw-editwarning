@@ -23,7 +23,7 @@
  * @author		Thomas David <ThomasDavid@gmx.de>
  * @copyright	2007-2009 Thomas David <ThomasDavid@gmx.de>
  * @license		http://www.gnu.org/licenses/gpl-2.0.html GNU GPL 2.0 or later
- * @version		0.4-prealpha
+ * @version		0.4-alpha
  * @category	Extensions
  * @package		EditWarning
  */
@@ -33,7 +33,7 @@ if ( !defined( 'MEDIAWIKI' ) && !defined( 'EDITWARNING_UNITTEST' ) ) {
 <p>To install this extension, put the following line in LocalSettings.php:\n
 <pre>require_once "\$IP/extensions/EditWarning/EditWarning.php";</pre></p>\n\n
 
-<p>See <a href="http://www.mediawiki.org/wiki/Extension:EditWarning">http://www.mediawiki.org/wiki/Extension:EditWarning</a> for more information.</p>
+<p>See <a href="http://www.mediawiki.org/wiki/Extension:EditWarning/0.4">http://www.mediawiki.org/wiki/Extension:EditWarning/0.4</a> for more information.</p>
 EOT;
     exit(1);
 }
@@ -43,8 +43,8 @@ $extension_dir = dirname(__FILE__) . "/";
 $wgExtensionCredits['EditWarning'][] = array(
     'name'        => "EditWarning",
     'author'      => "Thomas David",
-    'url'         => "http://www.mediawiki.org/wiki/Extension:EditWarning",
-    'description' => "Warns user editing a page that\'s currently being edited. (Version 0.4-prealpha)"
+    'url'         => "http://www.mediawiki.org/wiki/Extension:EditWarning/0.4",
+    'description' => "Warns user editing a page that\'s currently being edited. (Version 0.4-alpha)"
 );
 
 $wgAutoloadClasses['EditWarning']        = $extension_dir . 'EditWarning.class.php';
@@ -423,8 +423,9 @@ function fnEditWarning_abort( $ew, &$article, &$outputDone, &$pcache ) {
  * 
  */
 function fnEditWarning_logout(&$ew, &$user) {
+	$dbw =& wfGetDB( DB_MASTER );
 	$ew->setUserID( $user->getID() );
-	$ew->removeUserLocks();
+	$ew->removeUserLocks( $dbw );
 	
 	return true;
 }
