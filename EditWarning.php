@@ -40,11 +40,12 @@ EOT;
 
 $extension_dir = dirname(__FILE__) . "/";
 
-$wgExtensionCredits['EditWarning'][] = array(
-    'name'        => "EditWarning",
-    'author'      => "Thomas David",
-    'url'         => "http://www.mediawiki.org/wiki/Extension:EditWarning/0.4",
-    'description' => "Warns user editing a page that\'s currently being edited. (Version 0.4-alpha)"
+$wgExtensionCredits['other'][] = array(
+    'name'           => "EditWarning",
+    'author'         => "Thomas David",
+    'url'            => "http://www.mediawiki.org/wiki/Extension:EditWarning/0.4",
+    'version'        => "0.4-alpha",
+    'descriptionmsg' => "editwarning-desc"
 );
 
 $wgAutoloadClasses['EditWarning']        = $extension_dir . 'EditWarning.class.php';

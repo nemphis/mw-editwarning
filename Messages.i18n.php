@@ -36,6 +36,7 @@ $messages = array();
 
 /* Template. Just copy and translate. :)
 $messages['LANGCODE'] = array(
+    'editwarning-desc'       => "",
     'ew-notice-article'      => "",
     'ew-notice-section'      => "",
     'ew-warning-article'     => "",
@@ -52,6 +53,7 @@ $messages['LANGCODE'] = array(
 
 // English
 $messages['en'] = array(
+    'editwarning-desc'       => "Shows a warning message if several users edit the same article at the same time.",
     'ew-notice-article'      => "Until <strong>$1 $2</strong> other users get the warning that you're editing this article. " .
                                 "You can extend this time period by clicking <em>Show preview</em>.<br />$3",
     'ew-notice-section'      => "Until <strong>$1 $2</strong> other users get the warning that you're editing this section. " .
@@ -72,6 +74,29 @@ $messages['en'] = array(
 
 // German
 $messages['de'] = array(
+    'editwarning-desc'       => "Zeigt eine Warnmeldung an, wenn mehrere Benutzer gleichzeitig an einem Artikel arbeiten.",
+    'ew-notice-article'      => "Bis <strong>$1 $2</strong> erhalten andere Benutzer die Warnung, dass du diesen Artikel bearbeitest. " .
+                                "Mit <em>Vorschau zeigen</em>, kannst du den Zeitraum verlängern.<br />$3",
+    'ew-notice-section'      => "Bis <strong>$1 $2</strong> erhalten andere Benutzer die Warnung, dass du diesen Abschnitt bearbeitest. " .
+                                "Mit <em>Vorschau zeigen</em>, kannst du den Zeitraum verlängern.<br />$3",
+    'ew-warning-article'     => "Der Benutzer <strong>$1</strong> öffnete diesen Artikel am <strong>$2 um $3</strong> zum Bearbeiten. " .
+                                "Du solltest für die nächsten <strong>$4 $5</strong> keine Änderungen vornemen, um Bearbeitungskonflikte zu vermeiden.<br />$6",
+    'ew-warning-section'     => "Der Benutzer <strong>$1</strong> öffnete diesen Abschnitt am <strong>$2 um $3</strong> zum Bearbeiten. " .
+                                "Du solltest für die nächsten <strong>$4 $5</strong> keine Änderungen vornemen, um Bearbeitungskonflikte zu vermeiden.<br />$6",
+    'ew-warning-sectionedit' => "An einem oder mehreren Abschnitten in diesem Artikel wird gerade gearbeitet. " .
+                                "Bearbeite bitte einen bestimmten Abschnitt des Artikels oder warte " .
+                                "<strong>$1 $2</strong> für größere Änderungen, um Bearbeitungskonflikte zu vermeiden.<br />$3",
+    'ew-leave'               => "Du kannst diese Seite über den Button <em>Abbrechen</em> verlassen.",
+    'ew-canceled'            => "Bearbeitung abgebrochen.",
+    'ew-minute'              => "Minute",
+    'ew-minutes'             => "Minuten",
+    'ew-seconds'             => "Sekunden",
+    'ew-button-cancel'       => "Abbrechen"
+);
+
+// German (formal)
+$messages['de-formal'] = array(
+    'editwarning-desc'       => "Zeigt eine Warnmeldung an, wenn mehrere Benutzer gleichzeitig an einem Artikel arbeiten.",
     'ew-notice-article'      => "Bis <strong>$1 $2</strong> erhalten andere Benutzer die Warnung, dass Sie diesen Artikel bearbeiten. " .
                                 "Mit <em>Vorschau zeigen</em>, können Sie den Zeitraum verlängern.<br />$3",
     'ew-notice-section'      => "Bis <strong>$1 $2</strong> erhalten andere Benutzer die Warnung, dass Sie diesen Abschnitt bearbeiten. " .
