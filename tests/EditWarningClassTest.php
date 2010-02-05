@@ -2,33 +2,33 @@
 
 /**
  * Test cases for EditWarning class functions.
- * 
+ *
  * This file is part of the MediaWiki extension EditWarning. It contains
  * test cases for the EditWarning class functions.
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * 
- * @author		Thomas David <ThomasDavid@gmx.de>
- * @copyright	2007-2009 Thomas David <ThomasDavid@gmx.de>
- * @license		http://www.gnu.org/licenses/gpl-2.0.html GNU GPL 2.0 or later
- * @version		0.4-alpha
- * @category	Extensions
- * @package		EditWarning
+ *
+ * @author      Thomas David <ThomasDavid@gmx.de>
+ * @copyright   2007-2009 Thomas David <ThomasDavid@gmx.de>
+ * @license     http://www.gnu.org/licenses/gpl-2.0.html GNU GPL 2.0 or later
+ * @version     0.4-alpha
+ * @category    Extensions
+ * @package     EditWarning
  */
 
 if ( !defined( 'EDITWARNING_UNITTEST' ) ) {
-	define( 'EDITWARNING_UNITTEST', true );
+    define( 'EDITWARNING_UNITTEST', true );
 }
 
 require_once( "simpletest/autorun.php" );
@@ -46,14 +46,14 @@ class EditWarning_ClassTests extends UnitTestCase {
     private $_values;
 
     private function setDBvalues() {
-    	$this->_connection->setReturnValue( 'select', $this->_request, $this->_argument );
+        $this->_connection->setReturnValue( 'select', $this->_request, $this->_argument );
         for( $i=0; $i<count($this->_values); $i++) {
             $this->_connection->setReturnReferenceAt( $i, 'fetchRow', $this->_values[$i], $this->_request );
         }
     }
 
     public function __construct() {
-    	$this->UnitTestCase( "EditWarning Class Test" );
+        $this->UnitTestCase( "EditWarning Class Test" );
     }
 
     public function setUp() {
@@ -75,8 +75,8 @@ class EditWarning_ClassTests extends UnitTestCase {
      * - There are no locks.
      */
     public function testArticleEditing_NobodyCase() {
-    	$this->_values = null;
-    	$this->setDBvalues();
+        $this->_values = null;
+        $this->setDBvalues();
 
         $this->_p->load( $this->_connection );
         $this->assertFalse( $this->_p->anyLock() );
@@ -96,13 +96,13 @@ class EditWarning_ClassTests extends UnitTestCase {
      */
     public function testArticleEditing_HimselfCase() {
         $this->_values = array(
-          array(
-            'id'         => 1,
-            'user_id'    => 3,
-            'article_id' => 1,
-            'timestamp'  => mktime( 0,0,0, date("m"), date("d")+1, date("Y") ),
-            'section'    => 0
-          )
+            array(
+                'id'         => 1,
+                'user_id'    => 3,
+                'article_id' => 1,
+                'timestamp'  => mktime( 0,0,0, date("m"), date("d")+1, date("Y") ),
+                'section'    => 0
+            )
         );
         $this->setDBvalues();
 
@@ -124,13 +124,13 @@ class EditWarning_ClassTests extends UnitTestCase {
      */
     public function testArticleEditing_ArticleConflictCase() {
         $this->_values = array(
-          array(
-            'id'         => 1,
-            'user_id'    => 4,
-            'article_id' => 1,
-            'timestamp'  => mktime( 0,0,0, date("m"), date("d")+1, date("Y") ),
-            'section'    => 0
-          )
+            array(
+                'id'         => 1,
+                'user_id'    => 4,
+                'article_id' => 1,
+                'timestamp'  => mktime( 0,0,0, date("m"), date("d")+1, date("Y") ),
+                'section'    => 0
+            )
         );
         $this->setDBvalues();
 
@@ -152,16 +152,16 @@ class EditWarning_ClassTests extends UnitTestCase {
      */
     public function testArticleEditing_SectionConflictCase() {
         $this->_values = array(
-          array(
-            'id'         => 1,
-            'user_id'    => 4,
-            'article_id' => 1,
-            'timestamp'  => mktime( 0,0,0, date("m"), date("d")+1, date("Y") ),
-            'section'    => 1
-          )
+            array(
+                'id'         => 1,
+                'user_id'    => 4,
+                'article_id' => 1,
+                'timestamp'  => mktime( 0,0,0, date("m"), date("d")+1, date("Y") ),
+                'section'    => 1
+            )
         );
         $this->setDBvalues();
-        
+
         $this->_p->setSection( 1 );
         $this->_p->load( $this->_connection );
         $this->assertTrue( $this->_p->anyLock() );
@@ -181,13 +181,13 @@ class EditWarning_ClassTests extends UnitTestCase {
      */
     public function testSectionEditing_HimselfCase() {
         $this->_values = array(
-          array(
-            'id'         => 1,
-            'user_id'    => 3,
-            'article_id' => 1,
-            'timestamp'  => mktime( 0,0,0, date("m"), date("d")+1, date("Y") ),
-            'section'    => 1
-          )
+           array(
+               'id'         => 1,
+               'user_id'    => 3,
+               'article_id' => 1,
+               'timestamp'  => mktime( 0,0,0, date("m"), date("d")+1, date("Y") ),
+               'section'    => 1
+           )
         );
         $this->setDBvalues();
 
@@ -209,13 +209,13 @@ class EditWarning_ClassTests extends UnitTestCase {
      */
     public function testSectionEditing_SectionConflictCase() {
         $this->_values = array(
-          array(
-            'id'         => 1,
-            'user_id'    => 4,
-            'article_id' => 1,
-            'timestamp'  => mktime( 0,0,0, date("m"), date("d")+1, date("Y") ),
-            'section'    => 1
-          )
+            array(
+                'id'         => 1,
+                'user_id'    => 4,
+                'article_id' => 1,
+                'timestamp'  => mktime( 0,0,0, date("m"), date("d")+1, date("Y") ),
+                'section'    => 1
+            )
         );
         $this->setDBvalues();
 

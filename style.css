@@ -19,24 +19,24 @@
  * 
  * @author      Thomas David <ThomasDavid@gmx.de>
  * @copyright   2008-2009 Thomas David <ThomasDavid@gmx.de>
- * @license		http://www.gnu.org/licenses/gpl-2.0.html GNU GPL 2.0 or later
+ * @license     http://www.gnu.org/licenses/gpl-2.0.html GNU GPL 2.0 or later
  * @version     0.4-alpha
  * @category    Extensions
  * @package     EditWarning
- */
+*/
 
 .note {
-	text-align: center;
-	background: #ddffdd;
-	padding: .5em;
-	margin: 1em 0 1em 0;
-	border: 2px solid #008000;
+    text-align: center;
+    background: #ddffdd;
+    padding: .5em;
+    margin: 1em 0 1em 0;
+    border: 2px solid #008000;
 }
 
 .warning {
-	text-align: center;
-	background: #fdd;
-	padding: .5em;
-	margin: 1em 0 1em 0;
-	border: 2px solid #b80000;
+    text-align: center;
+    background: #fdd;
+    padding: .5em;
+    margin: 1em 0 1em 0;
+    border: 2px solid #b80000;
 }

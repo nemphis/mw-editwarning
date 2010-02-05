@@ -2,11 +2,11 @@
 
 /**
  * Implementation of EditWarning class.
- * 
+ *
  * This file is part of the MediaWiki extension EditWarning. It contains
  * the implementation of EditWarning class with functions to add, edit,
  * delete and check for article locks.
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
@@ -16,16 +16,16 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * 
- * @author		Thomas David <ThomasDavid@gmx.de>
- * @copyright	2007-2009 Thomas David <ThomasDavid@gmx.de>
- * @license		http://www.gnu.org/licenses/gpl-2.0.html GNU GPL 2.0 or later
- * @version		0.4-alpha
- * @category	Extensions
- * @package		EditWarning
+ *
+ * @author      Thomas David <ThomasDavid@gmx.de>
+ * @copyright   2007-2009 Thomas David <ThomasDavid@gmx.de>
+ * @license     http://www.gnu.org/licenses/gpl-2.0.html GNU GPL 2.0 or later
+ * @version     0.4-alpha
+ * @category    Extensions
+ * @package     EditWarning
  */
 
 require_once( "EditWarningLock.class.php" );
@@ -39,27 +39,29 @@ define("TIMESTAMP_NEW", 1);
  */
 define("TIMESTAMP_EXPIRED", 2);
 
-class InvalidTypeArgumentException extends Exception {}
+class InvalidTypeArgumentException extends Exception {
+
+}
 
 class EditWarning {
-	/**
-	 * @access private
-	 * @var int Contains the ID of the current user. 
-	 */
+    /**
+     * @access private
+     * @var int Contains the ID of the current user.
+     */
     private $_user_id;
-    
+
     /**
      * @access private
      * @var int Contains the ID of the current article.
      */
     private $_article_id;
-    
+
     /**
      * @access private
      * @var int Contains the ID of the current section (optional).
      */
     private $_section;
-    
+
     /**
      * @access private
      * @var mixed Array containing lock objects.
@@ -73,22 +75,22 @@ class EditWarning {
      * @param int $section ID of the current section (optional).
      */
     public function __construct( $user_id = null, $article_id = null, $section = null ) {
-    	$this->setUserID( $user_id );
-    	$this->setArticleID( $article_id );
-    	$this->setSection( $section );
+        $this->setUserID( $user_id );
+        $this->setArticleID( $article_id );
+        $this->setSection( $section );
     }
 
     /**
      * Recieves data from database sets object values and creates
      * lock objects.
-     * 
+     *
      * @access public
      * @param object $dbr Database connection object.
      */
     public function load( $dbr ) {
-    	// Build conditions for select operation.
-    	$conditions  = sprintf( "`article_id` = '%s'", $this->getArticleID() );
-    	$conditions .= sprintf( " AND `timestamp` >= '%s'", $this->getTimestamp( TIMESTAMP_EXPIRED ) );
+        // Build conditions for select operation.
+        $conditions  = sprintf( "`article_id` = '%s'", $this->getArticleID() );
+        $conditions .= sprintf( " AND `timestamp` >= '%s'", $this->getTimestamp( TIMESTAMP_EXPIRED ) );
         $result = $dbr->select( "editwarning_locks", "*", $conditions );
 
         // Create lock objects for every valid lock.
@@ -101,31 +103,31 @@ class EditWarning {
      * Creates timestamp with x minutes (depends on settings) in the future/past.
      * Future timestamps are used for new and updated article locks, past timestamps
      * are used to get all locks with valid timestamp.
-     * 
+     *
      * @access public
      * @param  int $type Which type of timestamp should be created. Use TIMESTAMP_NEW
      *                   or TIMESTAMP_EXPIRED constant.
      * @return int Unix timestamp.
      */
     public function getTimestamp( $type ) {
-    	global $EditWarning_Timeout;
-    	
-    	// Default timeout is 10 minutes.
-    	if ( $EditWarning_Timeout <= 0 || $EditWarning_Timeout == "" || $EditWarning_Timeout == null ) {
-    		$timeout = 10;
-    	} else {
-    		$timeout = $EditWarning_Timeout;
-    	}
+        global $EditWarning_Timeout;
+
+        // Default timeout is 10 minutes.
+        if ( $EditWarning_Timeout <= 0 || $EditWarning_Timeout == "" || $EditWarning_Timeout == null ) {
+            $timeout = 10;
+        } else {
+            $timeout = $EditWarning_Timeout;
+        }
 
         switch ( $type ) {
             case TIMESTAMP_NEW:
-              return mktime( date("H"), date("i") + $timeout, date("s"), date("m"), date("d"), date("Y") );
-              break;
+                return mktime( date("H"), date("i") + $timeout, date("s"), date("m"), date("d"), date("Y") );
+                break;
             case TIMESTAMP_EXPIRED:
-              return mktime( date("H"), date("i") - $timeout, date("s"), date("m"), date("d"), date("Y") );
-              break;
+                return mktime( date("H"), date("i") - $timeout, date("s"), date("m"), date("d"), date("Y") );
+                break;
             default:
-              throw new InvalidTypeArgumentException( "Invalid argument for type. Use TIMESTAMP_NEW or TIMESTAMP_EXPIRED constant.");
+                throw new InvalidTypeArgumentException( "Invalid argument for type. Use TIMESTAMP_NEW or TIMESTAMP_EXPIRED constant.");
         }
     }
 
@@ -168,7 +170,7 @@ class EditWarning {
     public function getSection() {
         return $this->_section;
     }
-    
+
     /**
      * @access public
      * @param int $section Id of the current section.
@@ -179,7 +181,7 @@ class EditWarning {
 
     /**
      * Checks if there is any valid article lock.
-     * 
+     *
      * @access public
      * @return bool Returns true if there is at least one lock, else false.
      */
@@ -193,7 +195,7 @@ class EditWarning {
 
     /**
      * Checks if there is a lock for the whole article.
-     * 
+     *
      * @access public
      * @return object|bool Returns the EditWarningLock object or false.
      */
@@ -209,7 +211,7 @@ class EditWarning {
 
     /**
      * Checks if there is a lock for the whole article by the current user.
-     * 
+     *
      * @access public
      * @return object|bool Returns the EditWarningLock object or false.
      */
@@ -225,7 +227,7 @@ class EditWarning {
 
     /**
      * Checks if there is a section lock for the article.
-     * 
+     *
      * @access public
      * @return object|bool Returns the EditWarningLock object or false.
      */
@@ -242,7 +244,7 @@ class EditWarning {
     /**
      * Checks if there is a section lock for the article by the
      * current user.
-     * 
+     *
      * @access public
      * @return object|mixed Returns the EditWarningLock object or false.
      */
@@ -266,7 +268,7 @@ class EditWarning {
 
     /**
      * Create EditWarningLock object and add it to _article_locks array.
-     * 
+     *
      * @access public
      * @param mixed $parent Reference to EditWarning class.
      * @param array $db_row Values of one database result row.
@@ -277,7 +279,7 @@ class EditWarning {
 
     /**
      * Saves a new lock into the database.
-     * 
+     *
      * @access public
      * @param object $dbw MediaWiki write connection object.
      * @param int $user_id Id of the current user.
@@ -285,19 +287,19 @@ class EditWarning {
      * @param int $section Id of the current section (0 for no section).
      */
     public function saveLock( $dbw, $user_id, $user_name, $section = 0 ) {
-    	$values = array(
-    	  'user_id'    => $user_id,
-    	  'user_name'  => $user_name,
-    	  'article_id' => $this->getArticleID(),
-    	  'timestamp'  => $this->getTimestamp( TIMESTAMP_NEW ),
-    	  'section'    => $section
-    	);
-    	$dbw->insert( "editwarning_locks", $values );
+        $values = array(
+            'user_id'    => $user_id,
+            'user_name'  => $user_name,
+            'article_id' => $this->getArticleID(),
+            'timestamp'  => $this->getTimestamp( TIMESTAMP_NEW ),
+            'section'    => $section
+        );
+        $dbw->insert( "editwarning_locks", $values );
     }
 
     /**
      * Update the timestamp of a lock.
-     * 
+     *
      * @access public
      * @see getTimestamp()
      * @param object $dbw MediaWiki write connection object.
@@ -308,16 +310,16 @@ class EditWarning {
     public function updateLock( $dbw, $user_id, $user_name, $section = 0 ) {
         $value      = array( "timestamp" => $this->getTimestamp( TIMESTAMP_NEW ) );
         $conditions = array(
-          'user_id'    => $user_id,
-          'article_id' => $this->getArticleID(),
-          'section'    => $section
+            'user_id'    => $user_id,
+            'article_id' => $this->getArticleID(),
+            'section'    => $section
         );
         $dbw->update( "editwarning_locks", $value, $conditions );
     }
 
     /**
      * Removes a lock from the databse.
-     * 
+     *
      * @access public
      * @param object $dbw MediaWiki write connection object.
      * @param int $user_id Id of the current user.
@@ -326,15 +328,15 @@ class EditWarning {
      */
     public function removeLock( $dbw, $user_id, $user_name ) {
         $conditions = array(
-          'user_id'    => $user_id,
-          'article_id' => $this->getArticleID()
+            'user_id'    => $user_id,
+            'article_id' => $this->getArticleID()
         );
         $dbw->delete( "editwarning_locks", $conditions );
     }
 
     /**
      * Remove all locks of an user from the database.
-     * 
+     *
      * @access public
      */
     public function removeUserLocks( $dbw ) {
