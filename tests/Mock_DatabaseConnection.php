@@ -19,10 +19,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * 
- * @author      Thomas David <ThomasDavid@gmx.de>
- * @copyright   2007-2009 Thomas David <ThomasDavid@gmx.de>
+ * @author      Thomas David <nemphis@code-geek.de>
+ * @copyright   2007-2010 Thomas David <nemphis@code-geek.de>
  * @license     http://www.gnu.org/licenses/gpl-2.0.html GNU GPL 2.0 or later
- * @version     0.4-alpha
+ * @version     0.4-beta
  * @category    Extensions
  * @package     EditWarning
  */

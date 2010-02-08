@@ -2,6 +2,9 @@
  EditWarning CHANGELOG
 ================================================
 
+==== 0.4-beta (2010-02-08) ====
+ * Small fixes and code formatting cleanup.
+
 ==== 0.4-alpha (2009-04-07) ====
  * Cleaned up the whole code, some parts rewritten.
  * New feature: Section editing is now supported.
