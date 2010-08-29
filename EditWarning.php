@@ -200,8 +200,8 @@ function fnEditWarning_edit(&$ew, &$editpage) {
         $ew->load( $dbr );
 
         if ( $ew->anyLock() ) {
-            $lock = $ew->sectionLock();
-            if ( $lock ) {
+            $sectionLock = $ew->sectionLock($section);
+            if ( $sectionLock != false ) {
                 if ( $ew->sectionUserLock() ) {
                     // User itself has lock on that section.
                     if ( defined( 'EDITWARNING_UNITTEST' ) ) {
@@ -211,7 +211,7 @@ function fnEditWarning_edit(&$ew, &$editpage) {
                     showInfoMsg(TYPE_SECTION);
                     unset($ew);
                     return true;
-                } elseif( $lock->getSection() == $section ) {
+                } elseif( $sectionLock->getSection() == $section ) {
                     // Someone else is already working on this section.
                     if ( defined( 'EDITWARNING_UNITTEST' ) ) {
                         return EDIT_SECTION_OTHER;
@@ -266,8 +266,8 @@ function fnEditWarning_edit(&$ew, &$editpage) {
         $ew->load( $dbr );
 
         if ( $ew->anyLock() ) {
-            $lock = $ew->articleLock();
-            if ( $lock ) {
+            $articleLock = $ew->articleLock();
+            if ( $articleLock ) {
                 if ( $ew->articleUserLock() ) {
                     // User itself has lock on that article.
                     if ( defined( 'EDITWARNING_UNITTEST' ) ) {
@@ -284,11 +284,14 @@ function fnEditWarning_edit(&$ew, &$editpage) {
                         return EDIT_ARTICLE_OTHER;
                     }
 
-                    showWarningMsg($lock);
+                    showWarningMsg($articleLock);
                     unset( $ew );
                     return true;
                 }
             } else {
+                // TODO: Needs to be changed: A article can have serveral
+                //       section locks by the user and/or other users.
+                /*
                 // Someone else is already working on a section of the article.
                 if ( defined( 'EDITWARNING_UNITTEST' ) ) {
                     return EDIT_ARTICLE_SECTION;
@@ -297,6 +300,8 @@ function fnEditWarning_edit(&$ew, &$editpage) {
                 showWarningMsg($ew->sectionLock());
                 unset( $ew );
                 return true;
+                */
+                die("This part is unfinished!");
             }
         } else {
             // There are no locks.

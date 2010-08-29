@@ -64,9 +64,21 @@ class EditWarning {
 
     /**
      * @access private
-     * @var mixed Array containing lock objects.
+     * @var object EditWarningLock object for the article.
      */
-    private $_article_locks = array();
+    private $_article_lock = false;
+
+    /**
+     * @access private
+     * @var int Number of section locks.
+     */
+    private $_num_section_locks = 0;
+
+    /**
+     * @access private
+     * @var mixed Array containing EditWarningLock objects of the article's sections.
+     */
+    private $_section_locks = array();
 
     /**
      * @access public
@@ -186,7 +198,7 @@ class EditWarning {
      * @return bool Returns true if there is at least one lock, else false.
      */
     public function anyLock() {
-        if ( count( $this->getLocks() ) > 0 ) {
+        if ( $this->getArticleLock() != false || $this->getNumberOfSectionLocks() > 0 ) {
             return true;
         } else {
             return false;
@@ -200,13 +212,7 @@ class EditWarning {
      * @return object|bool Returns the EditWarningLock object or false.
      */
     public function articleLock() {
-        $lock_objects = $this->getLocks();
-        foreach ( $lock_objects as $lock ) {
-            if ( $lock->getSection() == 0 ) {
-                return $lock;
-            }
-        }
-        return false;
+        return $this->getArticleLock();
     }
 
     /**
@@ -216,29 +222,53 @@ class EditWarning {
      * @return object|bool Returns the EditWarningLock object or false.
      */
     public function articleUserLock() {
-        $lock_objects = $this->getLocks();
-        foreach( $lock_objects as $lock ) {
-            if( $lock->getSection() == 0 && $lock->getUserID() == $this->getUserID() ) {
-                return $lock;
-            }
+        $lock = $this->getArticleLock();
+
+        if ($lock == false || $lock->getUserID() != $this->getUserID()) {
+            return false;
+        } else {
+            return $lock;
         }
-        return false;
     }
 
     /**
-     * Checks if there is a section lock for the article.
+     * Checks if there is a section lock for any section of the article.
+     *
+     * @access public
+     * @return mixed|bool Returns all EditWarningLock objects or false.
+     */
+    public function sectionLocks() {
+        if ($this->getNumberOfSectionLocks() == 0) {
+            return false;
+        } else {
+            $locks = array();
+
+            foreach( $this->getSectionLocks() as $lock ) {
+                if ($lock->getSection() > 0) {
+                    $locks[] = $lock;
+                }
+            }
+
+            return $locks;
+        }
+    }
+
+    /**
+     * Checks if there is a section lock for a specific section of the article.
      *
      * @access public
      * @return object|bool Returns the EditWarningLock object or false.
      */
-    public function sectionLock() {
-        $lock_objects = $this->getLocks();
-        foreach ( $lock_objects as $lock ) {
-            if ( $lock->getSection() > 0 ) {
-                return $lock;
+    public function sectionLock($section) {
+        if ($this->getNumberOfSectionLocks() == 0) {
+            return false;
+        } else {
+            foreach( $this->getSectionLocks() as $lock ) {
+                if ($lock->getSection() == $section) {
+                    return $lock;
+                }
             }
         }
-        return false;
     }
 
     /**
@@ -246,35 +276,62 @@ class EditWarning {
      * current user.
      *
      * @access public
-     * @return object|mixed Returns the EditWarningLock object or false.
+     * @return object|mixed Returns all EditWarningLock objects or false.
      */
     public function sectionUserLock() {
-        $lock_objects = $this->getLocks();
-        foreach ( $lock_objects as $lock ) {
-            if ( $lock->getSection() > 0 && $lock->getUserID() == $this->getUserID() ) {
-                return $lock;
+        if ($this->getNumberOfSectionLocks() == 0) {
+            return false;
+        } else {
+            $locks = array();
+
+            foreach($this->getSectionLocks() as $lock) {
+                if ($lock->getSection() > 0 && $lock->getUserID() == $this->getUserID()) {
+                    $locks[] = $lock;
+                }
             }
         }
-        return false;
     }
 
     /**
      * @access public
-     * @return mixed Array with EditWarningLock objects.
+     * @return int EditWarningLock object for the article.
      */
-    public function getLocks() {
+    public function getArticleLock() {
         return $this->_article_locks;
     }
 
     /**
-     * Create EditWarningLock object and add it to _article_locks array.
+     * @access public
+     * @return int Number of section locks.
+     */
+    public function getNumberOfSectionLocks() {
+        return $this->_num_section_locks;
+    }
+
+    /**
+     * @access public
+     * @return mixed Get section locks of the article.
+     */
+    public function getSectionLocks() {
+        return $this->_section_locks;
+    }
+   
+    /**
+     * Create EditWarningLock object and add it to _locks array.
      *
      * @access public
      * @param mixed $parent Reference to EditWarning class.
      * @param array $db_row Values of one database result row.
      */
     public function addLock( $parent, $db_row ) {
-        $this->_article_locks[] = new EditWarningLock( $parent, $db_row );
+        $lock = new EditWarningLock( $parent, $db_row );
+
+        if ( $lock->getSection() == 0) {
+            $this->_article_lock = $lock;
+        } else {
+            $this->_num_section_locks++;
+            $this->_section_locks[] = $lock;
+        }
     }
 
     /**
