@@ -102,6 +102,61 @@ function fnEditWarning_init() {
     return true;
 }
 
+/*
+ * Functions and definitions for fnEditWarning_edit
+ */
+// Used for messages to indicate edit type.
+define('TYPE_ARTICLE', 1);
+define('TYPE_SECTION', 2);
+
+/**
+ * Function to show info message about created or updated locks for sections
+ * or articles.
+ *
+ * @param int $msgtype Type of edit (article or section).
+ */
+function showInfoMsg($msgtype) {
+    $type = ($msgtype == 1) ? "ArticleNotice" : "SectionNotice";
+
+    // Show info message with updated timestamp.
+    $msg_params[] = date("Y-m-d", $ew->getTimestamp(TIMESTAMP_NEW));
+    $msg_params[] = date("H:i", $ew->getTimestamp(TIMESTAMP_NEW));
+    $msg = EditWarningMsg::getInstance($msgtype, $url, $msg_params);
+    $msg->show();
+    unset($msg);
+}
+
+/**
+ * Function to show warning message about existing locks for sections or
+ * articles.
+ *
+ * @param <type> $lockobj EditWarningLock object.
+ */
+function showWarningMsg($lockobj) {
+    $msgtype = ($lockobj->getSection() == 0) ? "ArticleWarning" : "SectionWarning";
+
+    // Calculate time to wait
+    $difference = floatval(abs(time() - $lock->getTimestamp()));
+    $time_to_wait = bcdiv($difference, 60, 0);
+
+    // Show warning.
+    $msg_params[] = $lock->getUserName();
+    $msg_params[] = date("Y-m-d", $lock->getTimestamp());
+    $msg_params[] = date("H:i", $lock->getTimestamp());
+    $msg_params[] = $time_to_wait;
+
+    // Use minutes or seconds string?
+    if ($time_to_wait > 1 || $difference > 60) {
+        $msg_params[] = wfMsg('ew-minutes');
+    } else {
+        $msg_params[] = wfMsg('ew-seconds');
+    }
+
+    $msg = EditWarningMsg::getInstance($msgtype, $url, $msg_params);
+    $msg->show();
+    unset($msg);
+}
+
 /**
  * Action on article editing
  *
@@ -153,15 +208,8 @@ function fnEditWarning_edit(&$ew, &$editpage) {
                         return EDIT_SECTION_USER;
                     }
                     $ew->updateLock( $dbw, $wgUser->getID(), $wgUser->getName(), $section );
-
-                    // Show info message with updated timestamp.
-                    $msg_params[] = date( "Y-m-d", $ew->getTimestamp( TIMESTAMP_NEW ) );
-                    $msg_params[] = date( "H:i", $ew->getTimestamp( TIMESTAMP_NEW ) );
-                    $msg = EditWarningMsg::getInstance( "SectionNotice", $url, $msg_params );
-                    $msg->show();
-                    unset( $ew );
-                    unset( $msg );
-
+                    showInfoMsg(TYPE_SECTION);
+                    unset($ew);
                     return true;
                 } elseif( $lock->getSection() == $section ) {
                     // Someone else is already working on this section.
@@ -169,28 +217,7 @@ function fnEditWarning_edit(&$ew, &$editpage) {
                         return EDIT_SECTION_OTHER;
                     }
 
-                    // Calculate time to wait
-                    $difference   = floatval( abs( time() - $lock->getTimestamp() ) );
-                    $time_to_wait = bcdiv( $difference, 60, 0 );
-
-                    // Show warning.
-                    $msg_params[] = $lock->getUserName();
-                    $msg_params[] = date( "Y-m-d", $lock->getTimestamp() );
-                    $msg_params[] = date( "H:i", $lock->getTimestamp() );
-                    $msg_params[] = $time_to_wait;
-
-                    // Use minutes or seconds string?
-                    if ($time_to_wait > 1 || $difference > 60) {
-                        $msg_params[] = wfMsg( 'ew-minutes' );
-                    } else {
-                        $msg_params[] = wfMsg( 'ew-seconds' );
-                    }
-
-                    $msg = EditWarningMsg::getInstance( "SectionWarning", $url, $msg_params );
-                    $msg->show();
-                    unset( $ew );
-                    unset( $msg );
-
+                    showWarningMsg($lock);
                     return true;
                 } else {
                     // Someone else is working on another section.
@@ -204,14 +231,8 @@ function fnEditWarning_edit(&$ew, &$editpage) {
                     }
 
                     $ew->saveLock( $dbw, $wgUser->getID(), $wgUser->getName(), $section );
-
-                    // Show info message.
-                    $msg_params[] = date( "Y-m-d", $ew->getTimestamp( TIMESTAMP_NEW ) );
-                    $msg_params[] = date( "H:i", $ew->getTimestamp( TIMESTAMP_NEW ) );
-                    $msg = EditWarningMsg::getInstance( "SectionNotice", $url, $msg_params );
-                    $msg->show();
+                    showInfoMsg(TYPE_SECTION);
                     unset( $ew );
-                    unset( $msg );
 
                     return true;
                 }
@@ -221,29 +242,8 @@ function fnEditWarning_edit(&$ew, &$editpage) {
                     return EDIT_SECTION_ARTICLE;
                 }
 
-                $lock = $ew->articleLock();
-
-                // Calculate time to wait
-                $difference   = floatval( abs( time() - $lock->getTimestamp() ) );
-                $time_to_wait = bcdiv( $difference, 60, 0 );
-                $msg_params[] = $lock->getUserName();
-                $msg_params[] = date( "Y-m-d", $lock->getTimestamp() );
-                $msg_params[] = date( "H:i", $lock->getTimestamp() );
-                $msg_params[] = $time_to_wait;
-
-                // Use minutes or seconds string?
-                if ($time_to_wait > 1 || $difference > 60) {
-                    $msg_params[] = wfMsg( 'ew-minutes' );
-                } else {
-                    $msg_params[] = wfMsg( 'ew-seconds' );
-                }
-
-                // Show warning.
-                $msg = EditWarningMsg::getInstance( "ArticleWarning", $url, $msg_params );
-                $msg->show();
+                showWarningMsg($ew->articleLock());
                 unset( $ew );
-                unset( $msg );
-
                 return true;
             }
         } else {
@@ -257,15 +257,8 @@ function fnEditWarning_edit(&$ew, &$editpage) {
             }
 
             $ew->saveLock( $dbw, $wgUser->getID(), $wgUser->getName(), $section );
-
-            // Show info message.
-            $msg_params[] = date( "Y-m-d", $ew->getTimestamp( TIMESTAMP_NEW ) );
-            $msg_params[] = date( "H:i", $ew->getTimestamp( TIMESTAMP_NEW ) );
-            $msg = EditWarningMsg::getInstance( "SectionNotice", $url, $msg_params );
-            $msg->show();
+            showInfoMsg(TYPE_SECTION);
             unset( $ew );
-            unset( $msg );
-
             return true;
         }
     } else {
@@ -282,44 +275,17 @@ function fnEditWarning_edit(&$ew, &$editpage) {
                     }
 
                     $ew->updateLock( $dbw, $wgUser->getID(), $wgUser->getName() );
-
-                    // Show info message with updated timestamp.
-                    $msg_params[] = date( "Y-m-d", $ew->getTimestamp( TIMESTAMP_NEW ) );
-                    $msg_params[] = date( "H:i", $ew->getTimestamp( TIMESTAMP_NEW ) );
-                    $msg = EditWarningMsg::getInstance( "ArticleNotice", $url, $msg_params );
-                    $msg->show();
+                    showInfoMsg(TYPE_ARTICLE);
                     unset( $ew );
-                    unset( $msg );
-
                     return true;
                 } else {
                     // Someone else is already working on the whole article.
-
                     if ( defined( 'EDITWARNING_UNITTEST' ) ) {
                         return EDIT_ARTICLE_OTHER;
                     }
 
-                    // Calculate time to wait
-                    $difference   = floatval( abs( time() - $lock->getTimestamp() ) );
-                    $time_to_wait = bcdiv( $difference, 60, 0 );
-                    $msg_params[] = $lock->getUserName();
-                    $msg_params[] = date( "Y-m-d", $lock->getTimestamp() );
-                    $msg_params[] = date( "H:i", $lock->getTimestamp() );
-                    $msg_params[] = $time_to_wait;
-
-                    // Use minutes or seconds string?
-                    if ($time_to_wait > 1 || $difference > 60) {
-                        $msg_params[] = wfMsg( 'ew-minutes' );
-                    } else {
-                        $msg_params[] = wfMsg( 'ew-seconds' );
-                    }
-
-                    // Show warning
-                    $msg = EditWarningMsg::getInstance( "ArticleWarning", $url, $msg_params );
-                    $msg->show();
+                    showWarningMsg($lock);
                     unset( $ew );
-                    unset( $msg);
-
                     return true;
                 }
             } else {
@@ -328,25 +294,8 @@ function fnEditWarning_edit(&$ew, &$editpage) {
                     return EDIT_ARTICLE_SECTION;
                 }
 
-                $lock = $ew->sectionLock();
-
-                // Calculate time to wait
-                $difference   = floatval( abs( time() - $lock->getTimestamp() ) );
-                $time_to_wait = bcdiv( $difference, 60, 0 );
-                $msg_params[] = $time_to_wait;
-
-                // Use minutes or seconds string?
-                if ($time_to_wait > 1 || $difference > 60) {
-                    $msg_params[] = wfMsg( 'ew-minutes' );
-                } else {
-                    $msg_params[] = wfMsg( 'ew-seconds' );
-                }
-
-                $msg = EditWarningMsg::getInstance( "ArticleSectionWarning", $url, $msg_params );
-                $msg->show();
+                showWarningMsg($ew->sectionLock());
                 unset( $ew );
-                unset( $msg );
-
                 return true;
             }
         } else {
@@ -361,15 +310,8 @@ function fnEditWarning_edit(&$ew, &$editpage) {
             }
 
             $ew->saveLock( $dbw, $wgUser->getID(), $wgUser->getName() );
-
-            // Show info message.
-            $msg_params[] = date( "Y-m-d", $ew->getTimestamp( TIMESTAMP_NEW ) );
-            $msg_params[] = date( "H:i", $ew->getTimestamp( TIMESTAMP_NEW ) );
-            $msg = EditWarningMsg::getInstance( "ArticleNotice", $url, $msg_params );
-            $msg->show();
+            showInfoMsg(TYPE_ARTICLE);
             unset( $ew );
-            unset( $msg );
-
             return true;
         }
     }
