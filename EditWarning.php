@@ -44,7 +44,7 @@ $wgExtensionCredits['other'][] = array(
     'name'           => "EditWarning",
     'author'         => "Thomas David",
     'url'            => "http://www.mediawiki.org/wiki/Extension:EditWarning/0.4",
-    'version'        => "0.4-alpha",
+    'version'        => "0.4-beta",
     'descriptionmsg' => "editwarning-desc"
 );
 
