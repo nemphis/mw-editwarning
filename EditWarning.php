@@ -289,19 +289,33 @@ function fnEditWarning_edit(&$ew, &$editpage) {
                     return true;
                 }
             } else {
-                // TODO: Needs to be changed: A article can have serveral
-                //       section locks by the user and/or other users.
-                /*
-                // Someone else is already working on a section of the article.
-                if ( defined( 'EDITWARNING_UNITTEST' ) ) {
-                    return EDIT_ARTICLE_SECTION;
+                // TODO: Unit Test
+                $sectionLocks = $ew->sectionLock();
+
+                foreach ( $sectionLocks as $lock) {
+                    if ( !$ew->isUserSectionLock($lock) ) {
+                        // There's a section lock of another user.
+                        // Deny article lock and show warning.
+                        if ( defined ( 'EDITWARNING_UNITTEST' ) ) {
+                            return EDIT_ARTICLE_SECTION;
+                        }
+
+                        showWarningMsg( $lock );
+                        unset( $ew );
+                        return true;
+                    }
                 }
 
-                showWarningMsg($ew->sectionLock());
+                // There are only section locks by the user.
+                // Delete section locks and create article lock.
+                if (defined( 'EDITWARNING_UNITTEST' ) ) {
+                    return EDIT_ARTICLE_NEW;
+                }
+                $ew->removeUserLocks( $dbw );
+                $ew->saveLock( $dbw, $wgUser->getID(), $wgUser->getName() );
+                showInfoMsg( TYPE_ARTICLE );
                 unset( $ew );
                 return true;
-                */
-                die("This part is unfinished!");
             }
         } else {
             // There are no locks.

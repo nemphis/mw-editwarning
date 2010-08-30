@@ -293,6 +293,20 @@ class EditWarning {
     }
 
     /**
+     * Checks if the given section lock is by the current user.
+     *
+     * @access public
+     * @return bool Return boolean value
+     */
+    public function isUserSectionLock($sectionLock) {
+        if ( $sectionLock->getUserID() == $this->getUserID() ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * @access public
      * @return int EditWarningLock object for the article.
      */
