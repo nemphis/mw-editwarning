@@ -115,13 +115,13 @@ define('TYPE_SECTION', 2);
  *
  * @param int $msgtype Type of edit (article or section).
  */
-function showInfoMsg($msgtype) {
+function showInfoMsg($msgtype, $cancel_url) {
     $type = ($msgtype == 1) ? "ArticleNotice" : "SectionNotice";
 
     // Show info message with updated timestamp.
     $msg_params[] = date("Y-m-d", $ew->getTimestamp(TIMESTAMP_NEW));
     $msg_params[] = date("H:i", $ew->getTimestamp(TIMESTAMP_NEW));
-    $msg = EditWarningMsg::getInstance($msgtype, $url, $msg_params);
+    $msg = EditWarningMsg::getInstance($msgtype, $cancel_url, $msg_params);
     $msg->show();
     unset($msg);
 }
@@ -132,7 +132,7 @@ function showInfoMsg($msgtype) {
  *
  * @param <type> $lockobj EditWarningLock object.
  */
-function showWarningMsg($lockobj) {
+function showWarningMsg($lockobj, $cancel_url) {
     $msgtype = ($lockobj->getSection() == 0) ? "ArticleWarning" : "SectionWarning";
 
     // Calculate time to wait
@@ -152,7 +152,7 @@ function showWarningMsg($lockobj) {
         $msg_params[] = wfMsg('ew-seconds');
     }
 
-    $msg = EditWarningMsg::getInstance($msgtype, $url, $msg_params);
+    $msg = EditWarningMsg::getInstance($msgtype, $cancel_url, $msg_params);
     $msg->show();
     unset($msg);
 }
@@ -180,6 +180,7 @@ function fnEditWarning_edit(&$ew, &$editpage) {
     }
 
     $ew->setUserID( $wgUser->getID() );
+    $ew->setUserName($wgUser->getName());
     $ew->setArticleID( $editpage->mArticle->getID() );
     $section    = fnEditWarning_getSection();
     $msg_params = array();
@@ -199,142 +200,134 @@ function fnEditWarning_edit(&$ew, &$editpage) {
         $ew->setSection( $section );
         $ew->load( $dbr );
 
-        if ( $ew->anyLock() ) {
-            $sectionLock = $ew->sectionLock($section);
-            if ( $sectionLock != false ) {
-                if ( $ew->sectionUserLock() ) {
-                    // User itself has lock on that section.
-                    if ( defined( 'EDITWARNING_UNITTEST' ) ) {
-                        return EDIT_SECTION_USER;
-                    }
-                    $ew->updateLock( $dbw, $wgUser->getID(), $wgUser->getName(), $section );
-                    showInfoMsg(TYPE_SECTION);
-                    unset($ew);
-                    return true;
-                } elseif( $sectionLock->getSection() == $section ) {
-                    // Someone else is already working on this section.
-                    if ( defined( 'EDITWARNING_UNITTEST' ) ) {
-                        return EDIT_SECTION_OTHER;
-                    }
-
-                    showWarningMsg($lock);
-                    return true;
-                } else {
-                    // Someone else is working on another section.
-                    if ( defined( 'EDITWARNING_UNITTEST' ) ) {
-                        return EDIT_SECTION_USER;
-                    }
-
-                    // Don't save locks for anonymous users
-                    if ( $wgUser->getID() < 1 ) {
-                        return true;
-                    }
-
-                    $ew->saveLock( $dbw, $wgUser->getID(), $wgUser->getName(), $section );
-                    showInfoMsg(TYPE_SECTION);
-                    unset( $ew );
-
-                    return true;
+        // Is the whole article locked?
+        if ($ew->isArticeLocked()) {
+            // Is it by the user?
+            if ($ew->isArticleLockedByUser()) {
+                // The user has already a lock on the whole article, but
+                // edits now a single section. Change article lock to
+                // section lock.
+                if (defined('EDITWARNING_UNITTEST')) {
+                    return EDIT_ARTICLE_NEW;
                 }
+
+                $ew->removeLock($dbw);
+                $ew->saveLock($dbw, $section);
+                showInfoMsg(TYPE_SECTION, $url);
+                unset($ew);
+                return true;
             } else {
-                // Someone else is working on the whole article.
-                if ( defined( 'EDITWARNING_UNITTEST' ) ) {
-                    return EDIT_SECTION_ARTICLE;
+                // Someone else has a lock on the whole section. Show warning.
+                if (defined('EDITWARNING_UNITTEST')) {
+                    return EDIT_ARTICLE_OTHER;
                 }
 
-                showWarningMsg($ew->articleLock());
-                unset( $ew );
+                showWarningMsg($ew->getArticleLock(), $url);
+                unset($ew);
+                return true;
+            }
+        } elseif ($ew->isSectionLocked($section)) {
+            $sectionLock = $ew->getSectionLock($section);
+            
+            // Is the section locked by the user?
+            if ($ew->isSectionLockedByUser($sectionLock)) {
+                // The section is locked by the user. Update lock.
+                if (defined('EDITWARNING_UNITTEST')) {
+                    return EDIT_SECTION_USER;
+                }
+                
+                $ew->updateLock($dbw, $section);
+                showInfoMsg(TYPE_SECTION, $url);
+                unset($ew);
+                return true;
+            } else {
+                // The section is locked by someone else. Show warning.
+                if (defined('EDITWARNING_UNITTEST')) {
+                    return EDIT_SECTION_OTHER;
+                }
+                
+                showWarningMsg($sectionLock, $url);
+                unset($ew);
                 return true;
             }
         } else {
-            if ( defined( 'EDITWARNING_UNITTEST' ) ) {
+            // No locks. Create section lock for user.
+            if (defined('EDITWARNING_UNITTEST')) {
                 return EDIT_SECTION_NEW;
             }
-
-            // Don't save locks for anonymous users
-            if ( $wgUser->getID() < 1 ) {
-                return true;
-            }
-
-            $ew->saveLock( $dbw, $wgUser->getID(), $wgUser->getName(), $section );
-            showInfoMsg(TYPE_SECTION);
-            unset( $ew );
+            
+            $ew->saveLock($dbw, $section);
+            showInfoMsg(TYPE_SECTION, $url);
+            unset($ew);
             return true;
         }
     } else {
         // Article editing
-        $ew->load( $dbr );
-
-        if ( $ew->anyLock() ) {
-            $articleLock = $ew->articleLock();
-            if ( $articleLock ) {
-                if ( $ew->articleUserLock() ) {
-                    // User itself has lock on that article.
-                    if ( defined( 'EDITWARNING_UNITTEST' ) ) {
-                        return EDIT_ARTICLE_USER;
-                    }
-
-                    $ew->updateLock( $dbw, $wgUser->getID(), $wgUser->getName() );
-                    showInfoMsg(TYPE_ARTICLE);
-                    unset( $ew );
-                    return true;
-                } else {
-                    // Someone else is already working on the whole article.
-                    if ( defined( 'EDITWARNING_UNITTEST' ) ) {
-                        return EDIT_ARTICLE_OTHER;
-                    }
-
-                    showWarningMsg($articleLock);
-                    unset( $ew );
-                    return true;
+        $ew->load($dbr);
+        
+        // Is the article locked?
+        if ($ew->isArticleLocked()) {
+            if ($ew->isArticleLockedByUser()) {
+                // The article is locked by the user. Update lock.
+                if (defined('EDITWARNING_UNITTEST')) {
+                    return EDIT_ARTICLE_USER;
                 }
+
+                $ew->updateLock($dbw);
+                showInfoMsg(TYPE_ARTICLE, $url);
+                unset($ew);
+                return true;
             } else {
-                // TODO: Unit Test
-                $sectionLocks = $ew->sectionLock();
-
-                foreach ( $sectionLocks as $lock) {
-                    if ( !$ew->isUserSectionLock($lock) ) {
-                        // There's a section lock of another user.
-                        // Deny article lock and show warning.
-                        if ( defined ( 'EDITWARNING_UNITTEST' ) ) {
-                            return EDIT_ARTICLE_SECTION;
-                        }
-
-                        showWarningMsg( $lock );
-                        unset( $ew );
-                        return true;
-                    }
+                // The article is locked by someone else. Show warning.
+                if (defined('EDITWARNING_UNITTEST')) {
+                    return EDIT_ARTICLE_OTHER;
                 }
 
-                // There are only section locks by the user.
-                // Delete section locks and create article lock.
-                if (defined( 'EDITWARNING_UNITTEST' ) ) {
+                $article_lock = $ew->getArticleLock();
+                showWarningMsg($article_lock, $url);
+                unset($ew);
+                return true;
+            }
+        } elseif ($ew->anySectionLocks()) {
+            // There is at least one section lock
+            if ($ew->anySectionLocksByOthers()) {
+                // At least one section lock by another user.
+                // So an article lock is not possible. Show warning.
+                if (defined('EDITWARNING_UNITTEST')) {
+                    return EDIT_SECTION_OTHER;
+                }
+
+                // TODO: Show warning message, refactor showWarningMsg function.
+                unset($ew);
+                return true;
+            } else {
+                // The user has exclusively one or more locks on sections
+                // of the article, but now wants to edit the whole article.
+                // Change sections locks to article lock.
+                if (defined('EDITWARNING_UNITTEST')) {
                     return EDIT_ARTICLE_NEW;
                 }
-                $ew->removeUserLocks( $dbw );
-                $ew->saveLock( $dbw, $wgUser->getID(), $wgUser->getName() );
-                showInfoMsg( TYPE_ARTICLE );
-                unset( $ew );
+
+                $ew->removeUserLocks($dbw);
+                $ew->saveLock($dbw);
+                showInfoMsg(TYPE_ARTICLE, $url);
+                unset($ew);
                 return true;
             }
         } else {
-            // There are no locks.
-            if ( defined( 'EDITWARNING_UNITTEST' ) ) {
+            // No locks. Create new article lock.
+            if (defined('EDITWARNING_UNITTEST')) {
                 return EDIT_ARTICLE_NEW;
             }
 
-            // Don't save locks for anonymous users.
-            if ( $wgUser->getID() < 1 ) {
-                return true;
-            }
-
-            $ew->saveLock( $dbw, $wgUser->getID(), $wgUser->getName() );
-            showInfoMsg(TYPE_ARTICLE);
-            unset( $ew );
+            $ew->saveLock($dbw);
+            showInfoMsg(TYPE_ARTICLE, $url);
+            unset($ew);
             return true;
         }
     }
 }
+
 
 /**
  * Action if article is saved.
