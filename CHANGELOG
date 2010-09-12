@@ -2,6 +2,19 @@
  EditWarning CHANGELOG
 ================================================
 
+==== 0.4-rc (2010-09-12) ====
+ * Bugfix: It was not correctly handled if a user opens an section for
+           editing and has already locked the article for editing.
+ * Bugfix: If the user opens an article for editing, there could be section
+           locks of the user himself and/or of other users. This was not
+           correctly handled.
+ * Bugfix: On MediaWiki installations with "nice URLs", the CSS files of
+           EditWarning may not be correctly loaded. Daniel K. Schneider
+           submitted a fix for this issue. (from 0.3 branch)
+ * Refactoring of the decision tree in fnEditWarning_edit method.
+ * Refactoring of the EditWarning class.
+ * Removed the incomplete french translation.
+
 ==== 0.4-beta (2010-02-08) ====
  * Small fixes and code formatting cleanup.
 

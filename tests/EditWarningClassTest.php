@@ -22,7 +22,7 @@
  * @author      Thomas David <nemphis@code-geek.de>
  * @copyright   2007-2010 Thomas David <nemphis@code-geek.de>
  * @license     http://www.gnu.org/licenses/gpl-2.0.html GNU GPL 2.0 or later
- * @version     0.4-beta
+ * @version     0.4-rc
  * @category    Extensions
  * @package     EditWarning
  */

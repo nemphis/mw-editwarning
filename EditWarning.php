@@ -23,7 +23,7 @@
  * @author      Thomas David <nemphis@code-geek.de>
  * @copyright   2007-2010 Thomas David <nemphis@code-geek.de>
  * @license     http://www.gnu.org/licenses/gpl-2.0.html GNU GPL 2.0 or later
- * @version     0.4-beta
+ * @version     0.4-rc
  * @category    Extensions
  * @package     EditWarning
  */
@@ -44,7 +44,7 @@ $wgExtensionCredits['other'][] = array(
     'name'           => "EditWarning",
     'author'         => "Thomas David",
     'url'            => "http://www.mediawiki.org/wiki/Extension:EditWarning/0.4",
-    'version'        => "0.4-beta",
+    'version'        => "0.4-rc",
     'descriptionmsg' => "editwarning-desc"
 );
 
@@ -86,15 +86,15 @@ function fnEditWarning_getSection() {
  * @return boolean Returns always true.
  */
 function fnEditWarning_init() {
-    global $wgRequest, $wgOut, $wgUser, $EditWarning_OnlyEditor;
+    global $wgRequest, $wgOut, $wgScriptPath, $wgUser, $EditWarning_OnlyEditor;
 
     // Add CSS styles to header
     if ( ( $wgRequest->getVal('action') == 'edit' || $wgRequest->getVal('action') == 'submit' )
             && $EditWarning_OnlyEditor != "false"
             && $wgUser->getID() >= 1 ) {
-        $wgOut->addHeadItem('edit_css', '  <link href="extensions/EditWarning/article_edit.css" rel="tylesheet" type="text/css" />');
+        $wgOut->addHeadItem('edit_css', '  <link href="' . $wgScriptPath . '/extensions/EditWarning/article_edit.css" rel="stylesheet" type="text/css" />');
     }
-    $wgOut->addHeadItem('EditWarning', '  <link href="extensions/EditWarning/style.css" rel="stylesheet" type="text/css" />');
+    $wgOut->addHeadItem('EditWarning', '  <link href="' . $wgScriptPath . '/extensions/EditWarning/style.css" rel="stylesheet" type="text/css" />');
 
     // Load messages
     wfLoadExtensionMessages('EditWarning');
