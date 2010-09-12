@@ -107,7 +107,8 @@ function fnEditWarning_init() {
  */
 // Used for messages to indicate edit type.
 define('TYPE_ARTICLE', 1);
-define('TYPE_SECTION', 2);
+define('TYPE_ARTICLE_SECTIONCONFLICT', 2);
+define('TYPE_SECTION', 3);
 
 /**
  * Function to show info message about created or updated locks for sections
@@ -115,13 +116,13 @@ define('TYPE_SECTION', 2);
  *
  * @param int $msgtype Type of edit (article or section).
  */
-function showInfoMsg($msgtype, $cancel_url) {
-    $type = ($msgtype == 1) ? "ArticleNotice" : "SectionNotice";
+function showInfoMsg($msgtype, $timestamp, $cancel_url) {
+    $type = ($msgtype == TYPE_ARTICLE) ? "ArticleNotice" : "SectionNotice";
 
     // Show info message with updated timestamp.
-    $msg_params[] = date("Y-m-d", $ew->getTimestamp(TIMESTAMP_NEW));
-    $msg_params[] = date("H:i", $ew->getTimestamp(TIMESTAMP_NEW));
-    $msg = EditWarningMsg::getInstance($msgtype, $cancel_url, $msg_params);
+    $msg_params[] = date("Y-m-d", $timestamp);
+    $msg_params[] = date("H:i", $timestamp);
+    $msg = EditWarningMsg::getInstance($type, $cancel_url, $msg_params);
     $msg->show();
     unset($msg);
 }
@@ -132,17 +133,30 @@ function showInfoMsg($msgtype, $cancel_url) {
  *
  * @param <type> $lockobj EditWarningLock object.
  */
-function showWarningMsg($lockobj, $cancel_url) {
-    $msgtype = ($lockobj->getSection() == 0) ? "ArticleWarning" : "SectionWarning";
-
+function showWarningMsg($msgtype, $lockobj, $cancel_url) {
+    switch ($msgtype) {
+        case TYPE_ARTICLE:
+            $type = "ArticleWarning";
+            break;
+        case TYPE_ARTICLE_SECTIONCONFLICT:
+            $type = "ArticleSectionWarning";
+            break;
+        case TYPE_SECTION:
+            $type = "SectionWarning";
+            break;
+    }
+    
     // Calculate time to wait
-    $difference = floatval(abs(time() - $lock->getTimestamp()));
+    $difference = floatval(abs(time() - $lockobj->getTimestamp()));
     $time_to_wait = bcdiv($difference, 60, 0);
 
-    // Show warning.
-    $msg_params[] = $lock->getUserName();
-    $msg_params[] = date("Y-m-d", $lock->getTimestamp());
-    $msg_params[] = date("H:i", $lock->getTimestamp());
+    // Parameters for message string
+    if ($msgtype == TYPE_ARTICLE || $msgtype == TYPE_SECTION) {
+        $msg_params[] = $lockobj->getUserName();
+        $msg_params[] = date("Y-m-d", $lockobj->getTimestamp());
+        $msg_params[] = date("H:i", $lockobj->getTimestamp());
+    }
+
     $msg_params[] = $time_to_wait;
 
     // Use minutes or seconds string?
@@ -152,7 +166,7 @@ function showWarningMsg($lockobj, $cancel_url) {
         $msg_params[] = wfMsg('ew-seconds');
     }
 
-    $msg = EditWarningMsg::getInstance($msgtype, $cancel_url, $msg_params);
+    $msg = EditWarningMsg::getInstance($type, $cancel_url, $msg_params);
     $msg->show();
     unset($msg);
 }
@@ -201,28 +215,28 @@ function fnEditWarning_edit(&$ew, &$editpage) {
         $ew->load( $dbr );
 
         // Is the whole article locked?
-        if ($ew->isArticeLocked()) {
+        if ($ew->isArticleLocked()) {
             // Is it by the user?
             if ($ew->isArticleLockedByUser()) {
                 // The user has already a lock on the whole article, but
                 // edits now a single section. Change article lock to
                 // section lock.
                 if (defined('EDITWARNING_UNITTEST')) {
-                    return EDIT_ARTICLE_NEW;
+                    return EDIT_SECTION_NEW;
                 }
 
                 $ew->removeLock($dbw);
                 $ew->saveLock($dbw, $section);
-                showInfoMsg(TYPE_SECTION, $url);
+                showInfoMsg(TYPE_SECTION, $ew->getTimestamp(TIMESTAMP_NEW), $url);
                 unset($ew);
                 return true;
             } else {
-                // Someone else has a lock on the whole section. Show warning.
+                // Someone else has a lock on the whole article. Show warning.
                 if (defined('EDITWARNING_UNITTEST')) {
                     return EDIT_ARTICLE_OTHER;
                 }
 
-                showWarningMsg($ew->getArticleLock(), $url);
+                showWarningMsg(TYPE_ARTICLE, $ew->getArticleLock(), $url);
                 unset($ew);
                 return true;
             }
@@ -237,7 +251,7 @@ function fnEditWarning_edit(&$ew, &$editpage) {
                 }
                 
                 $ew->updateLock($dbw, $section);
-                showInfoMsg(TYPE_SECTION, $url);
+                showInfoMsg(TYPE_SECTION, $ew->getTimestamp(TIMESTAMP_NEW), $url);
                 unset($ew);
                 return true;
             } else {
@@ -246,7 +260,7 @@ function fnEditWarning_edit(&$ew, &$editpage) {
                     return EDIT_SECTION_OTHER;
                 }
                 
-                showWarningMsg($sectionLock, $url);
+                showWarningMsg(TYPE_SECTION, $sectionLock, $url);
                 unset($ew);
                 return true;
             }
@@ -255,9 +269,14 @@ function fnEditWarning_edit(&$ew, &$editpage) {
             if (defined('EDITWARNING_UNITTEST')) {
                 return EDIT_SECTION_NEW;
             }
+
+            // Don't save locks for anonymous users.
+            if ($ew->getUserID() < 1) {
+                return true;
+            }
             
             $ew->saveLock($dbw, $section);
-            showInfoMsg(TYPE_SECTION, $url);
+            showInfoMsg(TYPE_SECTION, $ew->getTimestamp(TIMESTAMP_NEW), $url);
             unset($ew);
             return true;
         }
@@ -274,7 +293,7 @@ function fnEditWarning_edit(&$ew, &$editpage) {
                 }
 
                 $ew->updateLock($dbw);
-                showInfoMsg(TYPE_ARTICLE, $url);
+                showInfoMsg(TYPE_ARTICLE, $ew->getTimestamp(TIMESTAMP_NEW), $url);
                 unset($ew);
                 return true;
             } else {
@@ -284,7 +303,7 @@ function fnEditWarning_edit(&$ew, &$editpage) {
                 }
 
                 $article_lock = $ew->getArticleLock();
-                showWarningMsg($article_lock, $url);
+                showWarningMsg(TYPE_ARTICLE, $article_lock, $url);
                 unset($ew);
                 return true;
             }
@@ -297,7 +316,10 @@ function fnEditWarning_edit(&$ew, &$editpage) {
                     return EDIT_SECTION_OTHER;
                 }
 
-                // TODO: Show warning message, refactor showWarningMsg function.
+                $sectionLocks = $ew->getSectionLocksByOther();
+                // Get the newest lock of a section for the warning message.
+                $lock = $sectionLocks[$ew->getSectionLocksByOtherCount() - 1];
+                showWarningMsg(TYPE_ARTICLE_SECTIONCONFLICT, $lock, $url);
                 unset($ew);
                 return true;
             } else {
@@ -310,7 +332,7 @@ function fnEditWarning_edit(&$ew, &$editpage) {
 
                 $ew->removeUserLocks($dbw);
                 $ew->saveLock($dbw);
-                showInfoMsg(TYPE_ARTICLE, $url);
+                showInfoMsg(TYPE_ARTICLE, $ew->getTimestamp(TIMESTAMP_NEW), $url);
                 unset($ew);
                 return true;
             }
@@ -320,8 +342,13 @@ function fnEditWarning_edit(&$ew, &$editpage) {
                 return EDIT_ARTICLE_NEW;
             }
 
+            // Don't save locks for anonymous users.
+            if ($ew->getUserID() < 1) {
+                return true;
+            }
+
             $ew->saveLock($dbw);
-            showInfoMsg(TYPE_ARTICLE, $url);
+            showInfoMsg(TYPE_ARTICLE, $ew->getTimestamp(TIMESTAMP_NEW), $url);
             unset($ew);
             return true;
         }
@@ -344,10 +371,10 @@ function fnEditWarning_remove( &$ew, &$article, &$user, &$text, &$summary, $mino
         return true;
     }
 
-    $dbw =& wfGetDB( DB_MASTER );
-    $ew->setUserID( $wgUser->getID() );
-    $ew->setArticleID( $article->getID() );
-    $ew->removeLock( $dbw, $user->getID(), $user->getName() );
+    $dbw =& wfGetDB(DB_MASTER);
+    $ew->setUserID($wgUser->getID());
+    $ew->setArticleID($article->getID());
+    $ew->removeLock($dbw);
 
     return true;
 }
@@ -362,10 +389,11 @@ function fnEditWarning_remove( &$ew, &$article, &$user, &$text, &$summary, $mino
 function fnEditWarning_abort( $ew, &$article, &$outputDone, &$pcache ) {
     global $wgRequest, $wgUser;
 
-    if( $wgRequest->getVal( 'cancel' ) == "true" ) {
-        $dbw =& wfGetDB( DB_MASTER );
-        $ew->setArticleID( $article->getID() );
-        $ew->removeLock( $dbw, $wgUser->getID(), $wgUser->getName() );
+    if( $wgRequest->getVal('cancel' ) == "true") {
+        $dbw =& wfGetDB(DB_MASTER);
+        $ew->setUserID($wgUser->getID());
+        $ew->setArticleID($article->getID());
+        $ew->removeLock($dbw);
 
         $msg = EditWarningMsg::getInstance( "Cancel" );
         $msg->show();

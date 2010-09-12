@@ -33,6 +33,8 @@ require_once( "EditWarningInfoMsg.class.php" );
 require_once( "EditWarningWarnMsg.class.php" );
 require_once( "EditWarningCancelMsg.class.php" );
 
+class IllegalArgumentException extends Exception {}
+
 /**
  * Singleton factory for EditWarningMessage subclasses.
  */

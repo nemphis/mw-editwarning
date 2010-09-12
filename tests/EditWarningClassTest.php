@@ -78,12 +78,13 @@ class EditWarning_ClassTests extends UnitTestCase {
         $this->_values = null;
         $this->setDBvalues();
 
-        $this->_p->load( $this->_connection );
-        $this->assertFalse( $this->_p->anyLock() );
-        $this->assertFalse( $this->_p->articleLock() );
-        $this->assertFalse( $this->_p->articleUserLock() );
-        $this->assertFalse( $this->_p->sectionLock() );
-        $this->assertFalse( $this->_p->sectionUserLock() );
+        $this->_p->load($this->_connection);
+        $this->assertFalse($this->_p->anyLock());
+        $this->assertFalse($this->_p->isArticleLocked());
+        $this->assertFalse($this->_p->isArticleLockedByUser());
+        $this->assertFalse($this->_p->anySectionLocks());
+        $this->assertFalse($this->_p->anySectionLocksByUser());
+        $this->assertFalse($this->_p->anySectionLocksByOthers());
     }
 
     /**
@@ -106,12 +107,14 @@ class EditWarning_ClassTests extends UnitTestCase {
         );
         $this->setDBvalues();
 
-        $this->_p->load( $this->_connection );
-        $this->assertTrue( $this->_p->anyLock() );
-        $this->assertTrue( $this->_p->articleLock() );
-        $this->assertIsA( $this->_p->articleUserLock(), "EditWarningLock" );
-        $this->assertFalse( $this->_p->sectionLock() );
-        $this->assertFalse( $this->_p->sectionUserLock() );
+        $this->_p->load($this->_connection);
+        $this->assertTrue($this->_p->anyLock());
+        $this->assertTrue($this->_p->isArticleLocked());
+        $this->assertTrue($this->_p->isArticleLockedByUser());
+        $this->assertIsA($this->_p->getArticleLock(), "EditWarningLock");
+        $this->assertFalse($this->_p->anySectionLocks());
+        $this->assertFalse($this->_p->anySectionLocksByUser());
+        $this->assertFalse($this->_p->anySectionLocksByOthers());
     }
 
     /**
@@ -134,12 +137,13 @@ class EditWarning_ClassTests extends UnitTestCase {
         );
         $this->setDBvalues();
 
-        $this->_p->load( $this->_connection );
-        $this->assertTrue( $this->_p->anyLock() );
-        $this->assertTrue( $this->_p->articleLock() );
-        $this->assertFalse( $this->_p->articleUserLock() );
-        $this->assertFalse( $this->_p->sectionLock() );
-        $this->assertFalse( $this->_p->sectionUserLock() );
+        $this->_p->load($this->_connection);
+        $this->assertTrue($this->_p->anyLock());
+        $this->assertTrue($this->_p->isArticleLocked());
+        $this->assertFalse($this->_p->isArticleLockedByUser());
+        $this->assertFalse($this->_p->anySectionLocks());
+        $this->assertFalse($this->_p->anySectionLocksByUser());
+        $this->assertFalse($this->_p->anySectionLocksByOthers());
     }
 
     /**
@@ -162,13 +166,14 @@ class EditWarning_ClassTests extends UnitTestCase {
         );
         $this->setDBvalues();
 
-        $this->_p->setSection( 1 );
-        $this->_p->load( $this->_connection );
-        $this->assertTrue( $this->_p->anyLock() );
-        $this->assertFalse( $this->_p->articleLock() );
-        $this->assertFalse( $this->_p->articleUserLock() );
-        $this->assertTrue( $this->_p->sectionLock() );
-        $this->assertFalse( $this->_p->sectionUserLock() );
+        $this->_p->setSection(1);
+        $this->_p->load($this->_connection);
+        $this->assertTrue($this->_p->anyLock());
+        $this->assertFalse($this->_p->isArticleLocked());
+        $this->assertFalse($this->_p->isArticleLockedByUser());
+        $this->assertTrue($this->_p->anySectionLocks());
+        $this->assertFalse($this->_p->anySectionLocksByUser());
+        $this->assertTrue($this->_p->anySectionLocksByOthers());
     }
 
     /**
@@ -191,12 +196,13 @@ class EditWarning_ClassTests extends UnitTestCase {
         );
         $this->setDBvalues();
 
-        $this->_p->load( $this->_connection );
-        $this->assertTrue( $this->_p->anyLock() );
-        $this->assertFalse( $this->_p->articleLock() );
-        $this->assertFalse( $this->_p->articleUserLock() );
-        $this->assertTrue( $this->_p->sectionLock() );
-        $this->assertTrue( $this->_p->sectionUserLock() );
+        $this->_p->load($this->_connection );
+        $this->assertTrue($this->_p->anyLock());
+        $this->assertFalse($this->_p->isArticleLocked());
+        $this->assertFalse($this->_p->isArticleLockedByUser());
+        $this->assertTrue($this->_p->anySectionLocks());
+        $this->assertTrue($this->_p->anySectionLocksByUser());
+        $this->assertFalse($this->_p->anySectionLocksByOthers());
     }
 
     /**
@@ -219,13 +225,14 @@ class EditWarning_ClassTests extends UnitTestCase {
         );
         $this->setDBvalues();
 
-        $this->_p->setSection( 1 );
-        $this->_p->load( $this->_connection );
-        $this->assertTrue( $this->_p->anyLock() );
-        $this->assertFalse( $this->_p->articleLock() );
-        $this->assertFalse( $this->_p->articleUserLock() );
-        $this->assertTrue( $this->_p->sectionLock() );
-        $this->assertFalse( $this->_p->sectionUserLock() );
+        $this->_p->setSection(1);
+        $this->_p->load($this->_connection);
+        $this->assertTrue($this->_p->anyLock());
+        $this->assertFalse($this->_p->isArticleLocked());
+        $this->assertFalse($this->_p->isArticleLockedByUser());
+        $this->assertTrue($this->_p->anySectionLocks());
+        $this->assertFalse($this->_p->anySectionLocksByUser());
+        $this->assertTrue($this->_p->anySectionLocksByOthers());
     }
 }
 

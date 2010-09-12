@@ -230,20 +230,46 @@ class EditWarning {
      *
      * @access public
      * @param int Section ID
-     * @return object|bool Returns the EditWarningLock object for the section or false.
+     * @return object Returns the EditWarningLock object for the section or false.
      */
     public function getSectionLock() {
         if ($this->_locks['section']['count'] = 0) {
             return false;
         }
-        
-        $section_locks = array_merge($this->_locks['section']['user']['obj'], $this->_locks['section']['other']['obj']);
+
+        if ($this->_locks['section']['user']['count'] == 0) {
+            $section_locks = $this->_locks['section']['other']['obj'];
+        } elseif ($this->_locks['section']['other']['count'] == 0) {
+            $section_locks = $this->_locks['section']['user']['obj'];
+        } else {
+            $section_locks = array_merge($this->_locks['section']['user']['obj'], $this->_locks['section']['other']['obj']);
+        }
         
         foreach( $section_locks as $lock) {
             if ($this->_section == $lock->getSection()) {
                 return $lock;
             }
         }
+    }
+
+    /**
+     * Returns all section locks of other users.
+     *
+     * @access public
+     * @return mixed Returns all section locks of other users.
+     */
+    public function getSectionLocksByOther() {
+        return $this->_locks['section']['other']['obj'];
+    }
+
+    /**
+     * Returns the count of all section locks by other users.
+     *
+     * @access public
+     * @return int Count of all section locks by other users.
+     */
+    public function getSectionLocksByOtherCount() {
+        return $this->_locks['section']['other']['count'];
     }
     
     /**
@@ -381,12 +407,12 @@ class EditWarning {
         } else {
             $this->_locks['section']['count']++;
 
-            if ( $lock->getUserID() == $this->getUserID() ) {
+            if ($lock->getUserID() == $this->_user_id) {
                 $this->_locks['section']['user']['count']++;
                 $this->_locks['section']['user']['obj'][] = $lock;
             } else {
                 $this->_locks['section']['other']['count']++;
-                $this->_locks['section']['other']['obj'] = $lock;
+                $this->_locks['section']['other']['obj'][] = $lock;
             }
         }
     }

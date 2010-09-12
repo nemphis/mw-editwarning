@@ -107,13 +107,14 @@ class EditWarningHookTests extends UnitTestCase {
      */
     public function testEditArticle_NobodyCase() {
         $GLOBALS['unitGetSection'] = 0;
-        $this->_ew->setReturnValue( "anyLock", false );
-        $this->_ew->setReturnValue( "articleLock", false );
-        $this->_ew->setReturnValue( "articleUserLock", false );
-        $this->_ew->setReturnValue( "sectionLock", false );
-        $this->_ew->setReturnValue( "sectionUserLock", false );
+        $this->_ew->setReturnValue("anyLock", false);
+        $this->_ew->setReturnValue("isArticleLocked", false);
+        $this->_ew->setReturnValue("isArticleLockedByUser", false);
+        $this->_ew->setReturnValue("anySectionLocks", false);
+        $this->_ew->setReturnValue("anySectionLocksByUser", false);
+        $this->_ew->setReturnValue("anySectionLocksByOthers", false);
 
-        $this->assertEqual( fnEditWarning_edit( $this->_ew, $this->_ep ), EDIT_ARTICLE_NEW );
+        $this->assertEqual(fnEditWarning_edit($this->_ew, $this->_ep), EDIT_ARTICLE_NEW);
     }
 
     /**
@@ -126,13 +127,14 @@ class EditWarningHookTests extends UnitTestCase {
      */
     public function testEditArticle_HimselfCase() {
         $GLOBALS['unitGetSection'] = 0;
-        $this->_ew->setReturnValue( "anyLock", true );
-        $this->_ew->setReturnValue( "articleLock", true );
-        $this->_ew->setReturnValue( "articleUserLock", true );
-        $this->_ew->setReturnValue( "sectionLock", false );
-        $this->_ew->setReturnValue( "sectionUserLock", false );
+        $this->_ew->setReturnValue("anyLock", true);
+        $this->_ew->setReturnValue("isArticleLocked", true);
+        $this->_ew->setReturnValue("isArticleLockedByUser", true);
+        $this->_ew->setReturnValue("anySectionLocks", false);
+        $this->_ew->setReturnValue("anySectionLocksByUser", false);
+        $this->_ew->setReturnValue("anySectionLocksByOthers", false);
 
-        $this->assertEqual( fnEditWarning_edit( $this->_ew, $this->_ep ), EDIT_ARTICLE_USER );
+        $this->assertEqual(fnEditWarning_edit($this->_ew, $this->_ep), EDIT_ARTICLE_USER);
     }
 
     /**
@@ -145,13 +147,14 @@ class EditWarningHookTests extends UnitTestCase {
      */
     public function testEditArticle_ArticleConflictCase() {
         $GLOBALS['unitGetSection'] = 0;
-        $this->_ew->setReturnValue( "anyLock", true );
-        $this->_ew->setReturnValue( "articleLock", true );
-        $this->_ew->setReturnValue( "articleUserLock", false );
-        $this->_ew->setReturnValue( "sectionLock", false );
-        $this->_ew->setReturnValue( "sectionUserLock", false );
+        $this->_ew->setReturnValue("anyLock", true);
+        $this->_ew->setReturnValue("isArticleLocked", true);
+        $this->_ew->setReturnValue("isArticleLockedByUser", false);
+        $this->_ew->setReturnValue("anySectionLocks", false);
+        $this->_ew->setReturnValue("anySectionLocksByUser", false);
+        $this->_ew->setReturnValue("anySectionLocksByOthers", false);
 
-        $this->assertEqual( fnEditWarning_edit( $this->_ew, $this->_ep ), EDIT_ARTICLE_OTHER );
+        $this->assertEqual(fnEditWarning_edit($this->_ew, $this->_ep), EDIT_ARTICLE_OTHER);
     }
 
     /**
@@ -164,13 +167,14 @@ class EditWarningHookTests extends UnitTestCase {
      */
     public function testEditArticle_OwnSectionConflictCase() {
         $GLOBALS['unitGetSection'] = 0;
-        $this->_ew->setReturnValue( "anyLock", true );
-        $this->_ew->setReturnValue( "articleLock", false );
-        $this->_ew->setReturnValue( "articleUserLock", false );
-        $this->_ew->setReturnValue( "sectionLock", true );
-        $this->_ew->setReturnValue( "sectionUserLock", true);
+        $this->_ew->setReturnValue("anyLock", true);
+        $this->_ew->setReturnValue("isArticleLocked", false);
+        $this->_ew->setReturnValue("isArticleLockedByUser", false);
+        $this->_ew->setReturnValue("anySectionLocks", true);
+        $this->_ew->setReturnValue("anySectionLocksByUser", true);
+        $this->_ew->setReturnValue("anySectionLocksByOthers", false);
 
-        $this->assertEqual( fnEditWarning_edit( $this->_ew, $this->_ep ), EDIT_ARTICLE_USER );
+        $this->assertEqual(fnEditWarning_edit($this->_ew, $this->_ep), EDIT_ARTICLE_NEW);
     }
 
     /**
@@ -183,13 +187,14 @@ class EditWarningHookTests extends UnitTestCase {
      */
     public function testEditArticle_SectionConflictCase() {
         $GLOBALS['unitGetSection'] = 0;
-        $this->_ew->setReturnValue( "anyLock", true );
-        $this->_ew->setReturnValue( "articleLock", false );
-        $this->_ew->setReturnValue( "articleUserLock", false );
-        $this->_ew->setReturnValue( "sectionLock", true );
-        $this->_ew->setReturnValue( "sectionUserLock", false );
+        $this->_ew->setReturnValue("anyLock", true);
+        $this->_ew->setReturnValue("isArticleLocked", false);
+        $this->_ew->setReturnValue("isArticleLockedByUser", false);
+        $this->_ew->setReturnValue("anySectionLocks", true);
+        $this->_ew->setReturnValue("anySectionLocksByUser", false);
+        $this->_ew->setReturnValue("anySectionLocksByOthers", true);
 
-        $this->assertEqual( fnEditWarning_edit( $this->_ew, $this->_ep ), EDIT_ARTICLE_SECTION );
+        $this->assertEqual(fnEditWarning_edit($this->_ew, $this->_ep), EDIT_SECTION_OTHER);
     }
 
     /**
@@ -202,13 +207,16 @@ class EditWarningHookTests extends UnitTestCase {
      */
     public function testEditSection_NobodyCase() {
         $GLOBALS['unitGetSection'] = 1;
-        $this->_ew->setReturnValue( "anyLock", false );
-        $this->_ew->setReturnValue( "articleLock", false );
-        $this->_ew->setReturnValue( "articleUserLock", false );
-        $this->_ew->setReturnValue( "sectionLock", false );
-        $this->_ew->setReturnValue( "sectionUserLock", false );
+        $this->_ew->setReturnValue("anyLock", false);
+        $this->_ew->setReturnValue("isArticleLocked", false);
+        $this->_ew->setReturnValue("isArticleLockedByUser", false);
+        $this->_ew->setReturnValue("anySectionLocks", false);
+        $this->_ew->setReturnValue("anySectionLocksByUser", false);
+        $this->_ew->setReturnValue("anySectionLocksByOthers", false);
+        $this->_ew->setReturnValue("isSectionLocked", false);
+        $this->_ew->setReturnValue("isSectionLockedByUser", false);
 
-        $this->assertEqual( fnEditWarning_edit( $this->_ew, $this->_ep ), EDIT_SECTION_NEW );
+        $this->assertEqual(fnEditWarning_edit($this->_ew, $this->_ep), EDIT_SECTION_NEW);
     }
 
     /**
@@ -221,13 +229,16 @@ class EditWarningHookTests extends UnitTestCase {
      */
     public function testEditSection_ArticleHimselfCase() {
         $GLOBALS['unitGetSection'] = 1;
-        $this->_ew->setReturnValue( "anyLock", true );
-        $this->_ew->setReturnValue( "articleLock", true );
-        $this->_ew->setReturnValue( "articleUserLock", true );
-        $this->_ew->setReturnValue( "sectionLock", false );
-        $this->_ew->setReturnValue( "sectionUserLock", false );
+        $this->_ew->setReturnValue("anyLock", true);
+        $this->_ew->setReturnValue("isArticleLocked", true);
+        $this->_ew->setReturnValue("isArticleLockedByUser", true);
+        $this->_ew->setReturnValue("anySectionLocks", false);
+        $this->_ew->setReturnValue("anySectionLocksByUser", false);
+        $this->_ew->setReturnValue("anySectionLocksByOthers", false);
+        $this->_ew->setReturnValue("isSectionLocked", false);
+        $this->_ew->setReturnValue("isSectionLockedByUser", false);
 
-        $this->assertEqual( fnEditWarning_edit( $this->_ew, $this->_ep ), EDIT_SECTION_USER );
+        $this->assertEqual(fnEditWarning_edit($this->_ew, $this->_ep), EDIT_SECTION_NEW);
     }
 
     /**
@@ -240,13 +251,16 @@ class EditWarningHookTests extends UnitTestCase {
      */
     public function testEditSection_ArticleConflictCase() {
         $GLOBALS['unitGetSection'] = 1;
-        $this->_ew->setReturnValue( "anyLock", true );
-        $this->_ew->setReturnValue( "articleLock", true );
-        $this->_ew->setReturnValue( "articleUserLock", false );
-        $this->_ew->setReturnValue( "sectionLock", false );
-        $this->_ew->setReturnValue( "sectionUserLock", false );
+        $this->_ew->setReturnValue("anyLock", true);
+        $this->_ew->setReturnValue("isArticleLocked", true);
+        $this->_ew->setReturnValue("isArticleLockedByUser", false);
+        $this->_ew->setReturnValue("anySectionLocks", false);
+        $this->_ew->setReturnValue("anySectionLocksByUser", false);
+        $this->_ew->setReturnValue("anySectionLocksByOthers", false);
+        $this->_ew->setReturnValue("isSectionLocked", false);
+        $this->_ew->setReturnValue("isSectionLockedByUser", false);
 
-        $this->assertEqual( fnEditWarning_edit( $this->_ew, $this->_ep ), EDIT_ARTICLE_OTHER );
+        $this->assertEqual(fnEditWarning_edit($this->_ew, $this->_ep), EDIT_ARTICLE_OTHER);
     }
 
     /**
@@ -259,16 +273,19 @@ class EditWarningHookTests extends UnitTestCase {
      */
     public function testEditSection_HimselfCase() {
         $GLOBALS['unitGetSection'] = 1;
-        $lock = &new MockEditWarningLock();
-        $lock->setReturnValue( "getSection", 1 );
-        $this->_ew->setReturnValue( "sectionLock", $lock );
-        $this->_ew->setReturnValue( "anyLock", true );
-        $this->_ew->setReturnValue( "articleLock", false );
-        $this->_ew->setReturnValue( "articleUserLock", false );
-        $this->_ew->setReturnValue( "sectionLock", true );
-        $this->_ew->setReturnValue( "sectionUserLock", true );
+        //$lock = &new MockEditWarningLock();
+        //$lock->setReturnValue( "getSection", 1 );
+        //$this->_ew->setReturnValue( "sectionLock", $lock );
+        $this->_ew->setReturnValue("anyLock", true);
+        $this->_ew->setReturnValue("isArticleLocked", false);
+        $this->_ew->setReturnValue("isArticleLockedByUser", false);
+        $this->_ew->setReturnValue("anySectionLocks", true);
+        $this->_ew->setReturnValue("anySectionLocksByUser", true);
+        $this->_ew->setReturnValue("anySectionLocksByOthers", false);
+        $this->_ew->setReturnValue("isSectionLocked", true);
+        $this->_ew->setReturnValue("isSectionLockedByUser", true);
 
-        $this->assertEqual( fnEditWarning_edit( $this->_ew, $this->_ep ), EDIT_SECTION_USER );
+        $this->assertEqual(fnEditWarning_edit($this->_ew, $this->_ep), EDIT_SECTION_USER);
     }
 
     /**
@@ -281,16 +298,19 @@ class EditWarningHookTests extends UnitTestCase {
      */
     public function testEditSection_SectionConflictCase() {
         $GLOBALS['unitGetSection'] = 1;
-        $lock = &new MockEditWarningLock();
-        $lock->setReturnValue( "getSection", 1 );
-        $this->_ew->setReturnValue( "sectionLock", $lock );
-        $this->_ew->setReturnValue( "anyLock", true );
-        $this->_ew->setReturnValue( "articleLock", false );
-        $this->_ew->setReturnValue( "articleUserLock", false );
-        $this->_ew->setReturnValue( "sectionLock", true );
-        $this->_ew->setReturnValue( "sectionUserLock", false );
+        //$lock = &new MockEditWarningLock();
+        //$lock->setReturnValue( "getSection", 1 );
+        //$this->_ew->setReturnValue( "sectionLock", $lock );
+        $this->_ew->setReturnValue("anyLock", true);
+        $this->_ew->setReturnValue("isArticleLocked", false);
+        $this->_ew->setReturnValue("isArticleLockedByUser", false);
+        $this->_ew->setReturnValue("anySectionLocks", true);
+        $this->_ew->setReturnValue("anySectionLocksByUser", false);
+        $this->_ew->setReturnValue("anySectionLocksByOthers", true);
+        $this->_ew->setReturnValue("isSectionLocked", true);
+        $this->_ew->setReturnValue("isSectionLockedByUser", false);
 
-        $this->assertEqual( fnEditWarning_edit( $this->_ew, $this->_ep ), EDIT_SECTION_OTHER );
+        $this->assertEqual(fnEditWarning_edit($this->_ew, $this->_ep), EDIT_SECTION_OTHER);
     }
 }
 

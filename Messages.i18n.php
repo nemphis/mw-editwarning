@@ -115,23 +115,3 @@ $messages['de-formal'] = array(
     'ew-seconds'             => "Sekunden",
     'ew-button-cancel'       => "Abbrechen"
 );
-
-// French (translation by http://www.mediawiki.org/wiki/User:Rmatt)
-$messages['fr'] = array(
-    'ew-notice-article'      => "Jusqu'au <strong>$1</strong> a <strong>$2</strong>, les autres utilisateurs auront un message leur indiquant que vous modifiez cette page." .
-                                "Vous pouvez prolonger cette duree en cliquant sur <em>Previsualiser</em>.<br />$3",
-    'ew-notice-section'      => "Jusqu'au <strong>$1</strong> a <strong>$2</strong>, les autres utilisateurs auront un message leur indiquant que vous modifiez cette partie." .
-                                "Vous pouvez prolonger cette duree en cliquant sur <em>Previsualiser</em>.<br />$3",
-    'ew-warning-article'     => "L'utilisateur <strong>$1</strong> a ouvert cette page pour la modifier le <strong>$2</strong> à <strong>$3. " .
-                                "Vous devriez eviter de faire des modifications jusqu'au <strong>$4 $5</strong>, afin d'eviter des conflits de version.<br />$6",
-    'ew-warning-section'     => "User <strong>$1</strong> opened this section for editing on <strong>$2 $3</strong>. " .
-                                "Vous devriez eviter de faire des modifications jusqu'au <strong>$4 $5</strong>, afin d'eviter des conflits de version.<br />$6",
-    'ew-warning-sectionedit' => "One or more sections of this article are edited currently. " .
-                                "Please edit a specific section or wait <strong>$1 $2</strong> for bigger changes of this article, to avoid edit conflicts.<br />$3",
-    'ew-leave'               => "Vous pouvez quitter cette page en cliquant sur le bouton <em>Annuler</em>.",
-    'ew-canceled'            => "Modification interrompue.",
-    'ew-minute'              => "minute",
-    'ew-minutes'             => "minutes",
-    'ew-seconds'             => "secondes",
-    'ew-button-cancel'       => "Annuler"
-);
