@@ -22,7 +22,7 @@
  * @author      Thomas David <nemphis@code-geek.de>
  * @copyright   2007-2010 Thomas David <nemphis@code-geek.de>
  * @license     http://www.gnu.org/licenses/gpl-2.0.html GNU GPL 2.0 or later
- * @version     0.4-rc
+ * @version     0.4-rc1
  * @category    Extensions
  * @package     EditWarning
  */
@@ -52,6 +52,8 @@ require_once( "simpletest/autorun.php" );
 require_once( "../EditWarning.php" );
 require_once( "../EditWarning.class.php" );
 require_once( "../EditWarningLock.class.php" );
+require_once( "../../mw/includes/Defines.php" );
+require_once( "../../mw/includes/PoolCounter.php" );
 require_once( "../../mw/includes/Exception.php" );
 require_once( "../../mw/includes/EditPage.php" );
 require_once( "../../mw/includes/Article.php" );

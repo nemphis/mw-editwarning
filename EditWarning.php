@@ -21,9 +21,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author      Thomas David <nemphis@code-geek.de>
- * @copyright   2007-2010 Thomas David <nemphis@code-geek.de>
+ * @copyright   2007-2011 Thomas David <nemphis@code-geek.de>
  * @license     http://www.gnu.org/licenses/gpl-2.0.html GNU GPL 2.0 or later
- * @version     0.4-rc
+ * @version     0.4-rc1
  * @category    Extensions
  * @package     EditWarning
  */
@@ -52,6 +52,8 @@ $wgAutoloadClasses['EditWarning']        = $extension_dir . 'EditWarning.class.p
 $wgAutoloadClasses['EditWarningMsg']     = $extension_dir . 'EditWarningMsg.class.php';
 $wgExtensionMessagesFiles['EditWarning'] = $extension_dir . 'Messages.i18n.php';
 $wgExtensionFunctions[]                  = 'fnEditWarning_init';
+
+$editwarning = null;
 
 if ( !defined( 'EDITWARNING_UNITTEST' ) ) {
     $editwarning = new EditWarning();
@@ -182,6 +184,8 @@ function showWarningMsg($msgtype, $lockobj, $cancel_url) {
  */
 function fnEditWarning_edit(&$ew, &$editpage) {
     global $wgUser, $wgScriptPath, $wgScriptExtension, $PHP_SELF;
+    $dbr = null;
+    $dbw = null;
 
     // Abort on nonexisting pages
     if ( $editpage->mArticle->getID() < 1 ) {

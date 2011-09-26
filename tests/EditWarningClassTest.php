@@ -20,9 +20,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author      Thomas David <nemphis@code-geek.de>
- * @copyright   2007-2010 Thomas David <nemphis@code-geek.de>
+ * @copyright   2007-2011 Thomas David <nemphis@code-geek.de>
  * @license     http://www.gnu.org/licenses/gpl-2.0.html GNU GPL 2.0 or later
- * @version     0.4-rc
+ * @version     0.4-rc1
  * @category    Extensions
  * @package     EditWarning
  */
@@ -100,6 +100,7 @@ class EditWarning_ClassTests extends UnitTestCase {
             array(
                 'id'         => 1,
                 'user_id'    => 3,
+                'user_name'  => "Unittest",
                 'article_id' => 1,
                 'timestamp'  => mktime( 0,0,0, date("m"), date("d")+1, date("Y") ),
                 'section'    => 0
@@ -130,6 +131,7 @@ class EditWarning_ClassTests extends UnitTestCase {
             array(
                 'id'         => 1,
                 'user_id'    => 4,
+                'user_name'  => "Unittest",
                 'article_id' => 1,
                 'timestamp'  => mktime( 0,0,0, date("m"), date("d")+1, date("Y") ),
                 'section'    => 0
@@ -159,6 +161,7 @@ class EditWarning_ClassTests extends UnitTestCase {
             array(
                 'id'         => 1,
                 'user_id'    => 4,
+                'user_name'  => "Unittest",
                 'article_id' => 1,
                 'timestamp'  => mktime( 0,0,0, date("m"), date("d")+1, date("Y") ),
                 'section'    => 1
@@ -189,6 +192,7 @@ class EditWarning_ClassTests extends UnitTestCase {
            array(
                'id'         => 1,
                'user_id'    => 3,
+               'user_name'  => "Unittest",
                'article_id' => 1,
                'timestamp'  => mktime( 0,0,0, date("m"), date("d")+1, date("Y") ),
                'section'    => 1
@@ -218,6 +222,7 @@ class EditWarning_ClassTests extends UnitTestCase {
             array(
                 'id'         => 1,
                 'user_id'    => 4,
+                'user_name'  => "Unittest",
                 'article_id' => 1,
                 'timestamp'  => mktime( 0,0,0, date("m"), date("d")+1, date("Y") ),
                 'section'    => 1
