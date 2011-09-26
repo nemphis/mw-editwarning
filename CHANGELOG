@@ -2,6 +2,10 @@
  EditWarning CHANGELOG
 ================================================
 
+==== 0.4-rc1 (2011-09-26) ====
+ * Bugfix: Fix for "invalid call signature" error.
+ * Bugfix: Unit tests fixed.
+ 
 ==== 0.4-rc (2010-09-12) ====
  * Bugfix: It was not correctly handled if a user opens an section for
            editing and has already locked the article for editing.
