@@ -182,7 +182,7 @@ function showWarningMsg($msgtype, $lockobj, $cancel_url) {
  * @return boolean|int It returns a constant int if it runs in unit test
  *                     environment, else true.
  */
-function fnEditWarning_edit(&$ew, &$editpage) {
+function fnEditWarning_edit($ew, $editpage) {
     global $wgUser, $wgScriptPath, $wgScriptExtension, $PHP_SELF;
     $dbr = null;
     $dbw = null;
@@ -367,7 +367,7 @@ function fnEditWarning_edit(&$ew, &$editpage) {
  * @param
  * @return boolean Returns always true.
  */
-function fnEditWarning_remove( &$ew, &$article, &$user, &$text, &$summary, $minor, $watch, $sectionanchor, &$flags ) {
+function fnEditWarning_remove( $ew, $article, $user, $text, $summary, $minor, $watch, $sectionanchor, $flags ) {
     global $wgUser;
 
     // Abort on nonexisting pages or anonymous users.
@@ -390,7 +390,7 @@ function fnEditWarning_remove( &$ew, &$article, &$user, &$text, &$summary, $mino
  * @param
  * @return boolean Returns always true.
  */
-function fnEditWarning_abort( $ew, &$article, &$outputDone, &$pcache ) {
+function fnEditWarning_abort( $ew, $article, $outputDone, $pcache ) {
     global $wgRequest, $wgUser;
 
     if( $wgRequest->getVal('cancel' ) == "true") {
@@ -416,7 +416,7 @@ function fnEditWarning_abort( $ew, &$article, &$outputDone, &$pcache ) {
  * @return boolean Returns always true.
  *
  */
-function fnEditWarning_logout(&$ew, &$user) {
+function fnEditWarning_logout($ew, $user) {
     $dbw =& wfGetDB( DB_MASTER );
     $ew->setUserID( $user->getID() );
     $ew->removeUserLocks( $dbw );
