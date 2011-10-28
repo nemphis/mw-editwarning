@@ -3,8 +3,8 @@
 ================================================
 
 Author: Thomas David (nemphis@code-geek.de)
-Version: 0.4-rc1
-Date: 2011-09-26
+Version: 0.4
+Date: 2011-10-28
 Licence: GNU GPL 2.0 or later
 
 If the user opens a page for editing which is being edited by another user
@@ -13,8 +13,8 @@ at the same time this extension displays a warning on the editing page.
 Notice: It's not recommended to use this extension if anonymous users
 are allowed to edit pages, because it ignores anonymous page edits.
 
-Notice: This is a beta release. While you're encouraged to test it and report
-bugs and problems, you should keep in mind that it could mess things around.
+If you want to improve or extend this extension, fork it at github:
+https://github.com/nemphis/mw-editwarning
 
 ===== Installation =====
 
@@ -41,16 +41,7 @@ ALTER TABLE editwarning_locks
 
 require_once("$IP/extensions/EditWarning/EditWarning.php");
 
-4.) Open the file includes/EditPage.php of your MediaWiki installation
-    and search for the line:
-
-<span class='editHelp'>{$cancel} | {$edithelp}</span>
-
-    Replace that line with:
-
-<span class='editHelp'>{$edithelp}</span>
-
-5.) Optional: The default timeout is set to 10 minutes. If you want to change
+4.) Optional: The default timeout is set to 10 minutes. If you want to change
               this setting, add this line to your LocalSettings.php
               (Note: The value is the number of minutes):
 

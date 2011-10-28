@@ -27,7 +27,7 @@
  * @author      Thomas David <nemphis@code-geek.de>
  * @copyright   2007-2011 Thomas David <nemphis@code-geek.de>
  * @license     http://www.gnu.org/licenses/gpl-2.0.html GNU GPL 2.0 or later
- * @version     0.4-rc
+ * @version     0.4
  * @category    Extensions
  * @package     EditWarning
  */
@@ -114,4 +114,25 @@ $messages['de-formal'] = array(
     'ew-minutes'             => "Minuten",
     'ew-seconds'             => "Sekunden",
     'ew-button-cancel'       => "Abbrechen"
+);
+
+// Português Brasileiro
+$messages['pt-br'] = array(
+    'editwarning-desc'       => "Exibe uma mensagem no caso de vários usuários editarem o mesmo artigo, ao mesmo tempo.",
+    'ew-notice-article'      => "Até <strong>$1 $2</strong> outros usuários receberão a mensagem de que você está editando este artigo. " .
+                                "Você pode aumentar esse período de tempo clicando no botão <em>Mostrar previsão</em>.<br />$3",
+    'ew-notice-section'      => "Até <strong>$1 $2</strong> outros usuários receberão a mensagem de que você está editando esta seção. " .
+                                "Você pode aumentar esse período de tempo clicando no botão <em>Mostrar previsão</em>.<br />$3",
+    'ew-warning-article'     => "O usuário <strong>$1</strong> abriu esta página para edição em <strong>$2 $3</strong>. " .
+                                "Você não deve fazer alterações nesta página pelos próximos <strong>$4 $5</strong> para evitar conflitos de edição.<br />$6",
+    'ew-warning-section'     => "O usuário <strong>$1</strong> abriu esta seção para edição em <strong>$2 $3</strong>. " .
+                                "Você não deve fazer alterações nesta página pelos próximos <strong>$4 $5</strong> para evitar conflitos de edição.<br />$6",
+    'ew-warning-sectionedit' => "Uma ou mais seções deste artigo estão sendo editadas neste momento. " .
+                                "Por favor edite apenas um trecho específico (seção), ou espere <strong>$1 $2</strong> para fazer edições maiores neste artigo, para evita conflitos de edição.<br />$3",
+    'ew-leave'               => "Você pode sair dessa tela clicando no botão <em>Cancelar</em>.",
+    'ew-canceled'            => "Edição cancelada.",
+    'ew-minute'              => "minuto",
+    'ew-minutes'             => "minutos",
+    'ew-seconds'             => "segundos",
+    'ew-button-cancel'       => "Cancelar"
 );

@@ -2,6 +2,16 @@
  EditWarning CHANGELOG
 ================================================
 
+Notice: I've written this extension for a MediaWiki installation I've
+        maintained some time ago. Because I don't maintain it anymore
+        this extension won't recieve any further major improvements or
+        features. Even bugfixes may take some time. Please be patient
+        or send me a patch.
+
+==== 0.4 (2011-10-28) ====
+ * Portuguese translation by Paulo de Souza Lima
+ * Updated the article_edit.css for the new MediaWiki layout.
+
 ==== 0.4-rc1 (2011-09-26) ====
  * Bugfix: Fix for "invalid call signature" error.
  * Bugfix: Unit tests fixed.
