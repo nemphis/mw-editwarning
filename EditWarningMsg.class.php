@@ -56,27 +56,27 @@ class EditWarningMsg implements EditWarningMsgFactory {
         if ( $self->instance[$type] === null ) {
             switch ( $type ) {
                 case "ArticleNotice":
-                    $params[] = wfMsg( 'ew-leave' );
+                    $params[] = wfMessage( 'ew-leave' )->text();
                     self::$instance[$type] = new EditWarningInfoMsg( $path, $url );
                     self::$instance[$type]->setMsg( 'ew-notice-article', $params );
                     break;
                 case "ArticleWarning":
-                    $params[] = wfMsg( 'ew-leave' );
+                    $params[] = wfMessage( 'ew-leave' )->text();
                     self::$instance[$type] = new EditWarningWarnMsg( $path, $url );
                     self::$instance[$type]->setMsg( 'ew-warning-article', $params );
                     break;
                 case "ArticleSectionWarning":
-                    $params[] = wfMsg( 'ew-leave' );
+                    $params[] = wfMessage( 'ew-leave' )->text();
                     self::$instance[$type] = new EditWarningWarnMsg( $path, $url );
                     self::$instance[$type]->setMsg( 'ew-warning-sectionedit', $params );
                     break;
                 case "SectionNotice":
-                    $params[] = wfMsg( 'ew-leave' );
+                    $params[] = wfMessage( 'ew-leave' )->text();
                     self::$instance[$type] = new EditWarningInfoMsg( $path, $url );
                     self::$instance[$type]->setMsg( 'ew-notice-section', $params );
                     break;
                 case "SectionWarning":
-                    $params[] = wfMsg( 'ew-leave' );
+                    $params[] = wfMessage( 'ew-leave' )->text();
                     self::$instance[$type] = new EditWarningWarnMsg( $path, $url );
                     self::$instance[$type]->setMsg( 'ew-warning-section', $params );
                     break;

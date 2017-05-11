@@ -34,6 +34,6 @@ class EditWarningInfoMsg extends EditWarningMessage {
     public function __construct( $path, $url ) {
         $this->loadTemplate( $path . "/notice.html" );
         $this->addLabel( 'URL', $url );
-        $this->addLabel( 'BUTTON_CANCEL', wfMsg( 'ew-button-cancel' ) );
+        $this->addLabelMsg( 'BUTTON_CANCEL', 'ew-button-cancel' );
     }
 }

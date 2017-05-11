@@ -160,9 +160,9 @@ function showWarningMsg($msgtype, $lockobj, $cancel_url) {
 
     // Use minutes or seconds string?
     if ($time_to_wait > 1 || $difference > 60) {
-        $msg_params[] = wfMsg('ew-minutes');
+        $msg_params[] = wfMessage( 'ew-minutes' )->text();
     } else {
-        $msg_params[] = wfMsg('ew-seconds');
+        $msg_params[] = wfMessage( 'ew-seconds' )->text();
     }
 
     $msg = EditWarningMsg::getInstance($type, $cancel_url, $msg_params);
