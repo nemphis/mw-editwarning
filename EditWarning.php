@@ -98,9 +98,6 @@ function fnEditWarning_init() {
     }
     $wgOut->addHeadItem('EditWarning', '  <link href="' . $wgScriptPath . '/extensions/EditWarning/style.css" rel="stylesheet" type="text/css" />');
 
-    // Load messages
-    wfLoadExtensionMessages('EditWarning');
-
     return true;
 }
 
