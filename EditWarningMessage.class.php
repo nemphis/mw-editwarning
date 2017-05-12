@@ -50,12 +50,16 @@ abstract class EditWarningMessage {
         return $this->_content;
     }
 
+    public function addLabelMsg( $label, $msgkey ) {
+        $this->_labels[$label] = wfMessage( $msgkey )->text();
+    }
+
     public function addLabel( $label, $value ) {
         $this->_labels[$label] = $value;
     }
 
     public function setMsg( $msg, $params ) {
-        $this->_labels['MSG'] = wfMsgReal( $msg, $params, true );
+        $this->_labels['MSG'] = wfMessage( $msg )->rawParams( $params )->plain();
     }
 
     public function getLabels() {

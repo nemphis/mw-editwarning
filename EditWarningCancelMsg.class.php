@@ -33,6 +33,6 @@ require_once( "EditWarningMessage.class.php" );
 class EditWarningCancelMsg extends EditWarningMessage {
     public function __construct( $path ) {
         $this->loadTemplate( $path . "/canceled.html" );
-        $this->addLabel( 'CANCELED', wfMsg( 'ew-canceled' ) );
+        $this->addLabelMsg( 'CANCELED', 'ew-canceled' );
     }
 }
